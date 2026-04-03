@@ -1,45 +1,63 @@
 "use client";
 
-interface RunCommendationProps {
-  recommendation: { title: string; message: string; action: string } | null;
-  loading: boolean;
-  status: { bgGradient: string; textColor: string };
-}
-
-export default function RunCommendation({ recommendation, loading, status }: RunCommendationProps) {
+export default function RunCommendation({
+  recommendation,
+  loading,
+  status,
+}: any) {
   if (loading) {
-    return <div className="w-full h-75 rounded-[2rem] bg-white animate-pulse border border-slate-100 shadow-sm" />;
+    return (
+      <div className="w-full h-75 flex flex-col justify-between p-8 rounded-[2rem] bg-white border border-slate-100 shadow-sm relative overflow-hidden">
+        <div className="absolute inset-0 z-0 bg-gradient-to-r from-transparent via-slate-50/50 to-transparent -translate-x-full animate-shimmer" />
+        <div className="relative z-10 space-y-6">
+          <div className="h-2 w-24 bg-slate-100 rounded-full" />
+          <div className="space-y-3">
+            <div className="h-8 w-3/4 bg-slate-100 rounded-xl" />
+            <div className="h-8 w-1/2 bg-slate-100 rounded-xl" />
+          </div>
+          <div className="space-y-3 py-4">
+            <div className="h-4 w-full bg-slate-50 rounded-lg" />
+            <div className="h-4 w-5/6 bg-slate-50 rounded-lg" />
+          </div>
+          <div className="h-2 w-32 bg-slate-100 rounded-full" />
+        </div>
+      </div>
+    );
   }
-
-  const { title, message, action } = recommendation || {
-    title: "Coach is Hydrating",
-    message: "Generating fresh advice. Stay safe out there!",
-    action: "Please Wait"
-  };
 
   return (
     <div className="w-full h-75 flex flex-col justify-between p-8 rounded-[2rem] bg-white border border-slate-100 shadow-sm relative overflow-hidden transition-all duration-700">
-      <div className="relative z-10 flex flex-col h-full">
+      <div
+        className={`relative z-10 flex flex-col h-full transition-all duration-1000 ease-out transform ${!recommendation ? "opacity-0 translate-y-4" : "opacity-100 translate-y-0"}`}
+      >
         <div>
-          <p className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">RunCommendation</p>
-          <h2 className={`text-3xl font-black tracking-tight leading-tight mt-4 mb-2 line-clamp-2 ${status.textColor}`}>
-            {title}
+          <p className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">
+            RunCommendation
+          </p>
+          <h2
+            className={`text-6xl font-black tracking-tight leading-tight mt-4 mb-2 line-clamp-2 ${status.textColor}`}
+          >
+            {recommendation?.title}
           </h2>
         </div>
-
         <div className="flex-grow flex items-center">
-          <p className="text-base font-bold text-slate-600 leading-relaxed italic line-clamp-3">
-            "{message}"
+          <p className="text-base font-bold text-slate-600 leading-relaxed line-clamp-3">
+            {recommendation?.message}
           </p>
         </div>
-
         <div className="mt-4">
-          <span className={`px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest border ${status.textColor} border-current opacity-80`}>
-            {action}
+          <span
+            className={`text-[10px] font-black uppercase tracking-widest ${status.textColor}`}
+          >
+            {recommendation?.action}
           </span>
         </div>
       </div>
-      <div className={`absolute bottom-0 left-0 w-full h-2 bg-gradient-to-r ${status.bgGradient}`} />
+      <div
+        className={`absolute bottom-0 left-0 w-full h-2 bg-gradient-to-r transition-opacity duration-1000 ease-out ${
+          !recommendation ? "opacity-0" : "opacity-100"
+        } ${status.bgGradient}`}
+      />
     </div>
   );
 }

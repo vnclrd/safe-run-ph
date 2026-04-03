@@ -6,4 +6,3 @@ initializeApp();
 setGlobalOptions({ region: "asia-southeast1" });
 
 export { getLiveWeather } from "./getLiveWeather/handler";
-export { getRunRecommendation } from "./getRunRecommendation/handler";
