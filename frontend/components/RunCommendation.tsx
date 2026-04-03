@@ -26,31 +26,24 @@ export default function RunCommendation({
   }
 
   return (
-    <div className="w-full h-75 flex flex-col justify-between p-8 rounded-[2rem] bg-white border border-slate-100 shadow-sm relative overflow-hidden transition-all duration-700">
+    <div className="w-full h-auto min-h-[18.75rem] md:h-75 flex flex-col justify-between p-6 sm:p-8 rounded-[2rem] bg-white border border-slate-100 shadow-sm relative overflow-hidden transition-all duration-700">
       <div
         className={`relative z-10 flex flex-col h-full transition-all duration-1000 ease-out transform ${!recommendation ? "opacity-0 translate-y-4" : "opacity-100 translate-y-0"}`}
       >
         <div>
-          <p className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
             RunCommendation
           </p>
           <h2
-            className={`text-6xl font-black tracking-tight leading-tight mt-4 line-clamp-2 ${status.textColor}`}
+            className={`text-3xl sm:text-5xl md:text-6xl font-black tracking-tight leading-tight mt-2 md:mt-4 line-clamp-2 ${status.textColor}`}
           >
             {recommendation?.title}
           </h2>
         </div>
-        <div className="flex-grow flex items-center">
-          <p className="mt-[-24] text-base font-bold text-slate-600 leading-relaxed line-clamp-3">
+        <div className="flex-grow flex items-center py-4 md:py-0">
+          <p className="md:mt-[-24] text-sm sm:text-base font-bold text-slate-600 leading-relaxed line-clamp-4 md:line-clamp-3">
             {recommendation?.message}
           </p>
-        </div>
-        <div className="mt-4">
-          <span
-            className={`text-[10px] font-black uppercase tracking-widest ${status.textColor}`}
-          >
-            {recommendation?.action}
-          </span>
         </div>
       </div>
       <div

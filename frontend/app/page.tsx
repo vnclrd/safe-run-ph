@@ -57,16 +57,14 @@ export default function Home() {
           };
 
   return (
-    <main className="min-h-screen bg-slate-50 p-8 md:p-16">
+    <main className="min-h-screen bg-slate-50 p-4 sm:p-8 md:p-16">
       <h1
-        className={`text-2xl font-black italic uppercase mb-12 ${status.textColor}`}
+        className={`text-2xl font-black italic uppercase mb-8 md:mb-12 ${status.textColor}`}
       >
         SAFE-RUN PH
       </h1>
 
-      {/* Container Grid */}
-      <div className="max-w-6xl mx-auto grid lg:grid-cols-3 gap-8">
-        {/* ROW 1: Quick Stats */}
+      <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
         <TemperatureBadge
           weather={weather}
           loading={weatherLoading}
@@ -80,7 +78,6 @@ export default function Home() {
           />
         </div>
 
-        {/* ROW 2: Deep Dive (Scrollable) */}
         <div className="lg:col-span-3">
           <WeatherForecastCard
             weather={weather}
@@ -89,9 +86,8 @@ export default function Home() {
           />
         </div>
 
-        {/* Footer / Space for extra scroll */}
-        <div className="lg:col-span-3 py-12 text-center">
-          <p className="text-slate-300 font-black italic uppercase text-xs tracking-[0.5em]">
+        <div className="lg:col-span-3 py-6 md:py-12 text-center">
+          <p className="text-slate-300 font-black italic uppercase text-[10px] tracking-[0.5em]">
             Safe-Run PH
           </p>
         </div>
