@@ -2,41 +2,38 @@ import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { validateWeatherRequest } from "./request";
 import { fetchAndCacheWeather } from "./action";
 
-/**
- * getLiveWeather Handler (v2)
- * Explicitly set to Singapore (asia-southeast1) for PH runners.
- */
 export const getLiveWeather = onCall({
   region: "asia-southeast1",
   cors: true,
-  maxInstances: 10
+  maxInstances: 10,
+  secrets: ["OPENWEATHER_API_KEY"] 
 }, async (request) => {
   
-  // 1. Validate Input (Check if city was provided)
   const validatedData = validateWeatherRequest(request.data);
   
   try {
+    const weather = await fetchAndCacheWeather();
 
-    // 2. Execute Business Logic (PAGASA Fetch)
-    const heatIndex = await fetchAndCacheWeather();
+    // This tells TypeScript: "If weather is null or undefined, stop here."
+    if (!weather) {
+      throw new Error("Weather data could not be retrieved from any source.");
+    }
 
-    // 3. Return structured response to the frontend
     return {
       success: true,
       city: validatedData.city,
-      heatIndex: heatIndex,
+      temp: weather.temp,
+      heatIndex: weather.heatIndex,
       timestamp: Date.now(),
-      status: "fetched_live"
+      status: weather.status || "fetched_live"
     };
 
   } catch (error: any) {
-    // Log the actual error in the Firebase Console so you can debug it
     console.error("CRITICAL: Weather Handler Failure", error);
 
-    // Throw a structured error that the Firebase SDK understands
     throw new HttpsError(
       "internal", 
-      error.message || "Failed to retrieve weather data."
+      error.message || "Failed to retrieve hybrid weather data."
     );
   }
 });
