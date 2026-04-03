@@ -35,7 +35,7 @@ export default function RunCommendation({
             RunCommendation
           </p>
           <h2
-            className={`text-3xl sm:text-5xl md:text-6xl font-black tracking-tight leading-tight mt-2 md:mt-4 line-clamp-2 ${status.textColor}`}
+            className={`text-3xl sm:text-5xl md:text-5xl font-black tracking-tight leading-tight mt-2 md:mt-4 line-clamp-2 ${status.textColor}`}
           >
             {recommendation?.title}
           </h2>
