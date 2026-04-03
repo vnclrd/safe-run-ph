@@ -35,13 +35,13 @@ export default function RunCommendation({
             RunCommendation
           </p>
           <h2
-            className={`text-6xl font-black tracking-tight leading-tight mt-4 mb-2 line-clamp-2 ${status.textColor}`}
+            className={`text-6xl font-black tracking-tight leading-tight mt-4 line-clamp-2 ${status.textColor}`}
           >
             {recommendation?.title}
           </h2>
         </div>
         <div className="flex-grow flex items-center">
-          <p className="text-base font-bold text-slate-600 leading-relaxed line-clamp-3">
+          <p className="mt-[-24] text-base font-bold text-slate-600 leading-relaxed line-clamp-3">
             {recommendation?.message}
           </p>
         </div>

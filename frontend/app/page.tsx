@@ -4,7 +4,6 @@ import { httpsCallable } from "firebase/functions";
 import { functions } from "@/lib/firebase";
 import TemperatureBadge from "@/components/TemperatureBadge";
 import RunCommendation from "@/components/RunCommendation";
-// 1. Import your library
 import recommendations from "@/lib/recommendations.json";
 
 export default function Home() {
@@ -54,7 +53,6 @@ export default function Home() {
       <div className="max-w-6xl mx-auto grid lg:grid-cols-3 gap-8">
         <TemperatureBadge weather={weather} loading={weatherLoading} status={status} />
         <div className="lg:col-span-2">
-          {/* ⚡ NO MORE LOADING STATE NEEDED FOR AI! */}
           <RunCommendation recommendation={recommendation} loading={weatherLoading} status={status} />
         </div>
       </div>

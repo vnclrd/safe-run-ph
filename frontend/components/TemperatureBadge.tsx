@@ -24,16 +24,16 @@ export default function TemperatureBadge({
       <div className="relative z-10 flex flex-col justify-between h-full">
         <div>
           <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80 mb-1">
-            Metro Manila Heat Index
+            Temperature in Metro Manila
           </p>
           <div className="flex items-baseline gap-1">
             <span className="text-9xl font-black tracking-tighter">
-              {weather?.heatIndex}
+              {weather?.temp}
             </span>
             <span className="text-4xl font-black opacity-80">°c</span>
           </div>
           <p className="text-lg font-bold opacity-90 mt-2">
-            Feels Like: {weather?.temp}°c
+            Heat Index: {weather?.heatIndex}°c
           </p>
         </div>
         <div className="flex">
