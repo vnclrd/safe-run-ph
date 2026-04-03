@@ -3,8 +3,14 @@ import { useEffect, useState } from "react";
 import { httpsCallable } from "firebase/functions";
 import { functions } from "@/lib/firebase";
 
+// Define the shape of the data returning from your Cloud Function
+interface WeatherData {
+  temp: number;
+  heatIndex: number;
+}
+
 export default function WeatherBadge() {
-  const [heatIndex, setHeatIndex] = useState<number | null>(null);
+  const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -16,12 +22,13 @@ export default function WeatherBadge() {
         // 2. Call the function
         const result = await getLiveWeather();
         
-        // 3. Cast and set the data
-        const data = result.data as { heatIndex: number };
-        setHeatIndex(data.heatIndex);
+        // 3. Cast the data (now contains both temp and heatIndex)
+        const data = result.data as WeatherData;
+        setWeather(data);
       } catch (err) {
         console.error("Cloud Function Error:", err);
-        setHeatIndex(35); // Safe fallback for Metro Manila
+        // Safe fallbacks for Metro Manila if the API fails
+        setWeather({ temp: 31, heatIndex: 35 }); 
       } finally {
         setLoading(false);
       }
@@ -45,29 +52,40 @@ export default function WeatherBadge() {
     };
   };
 
-  // Loading State (Prevents UI flicker)
+  // Loading State
   if (loading) {
     return (
-      <div className="p-8 rounded-[3rem] bg-slate-200 animate-pulse h-[220px] w-full" />
+      <div className="w-80 h-75 rounded-[2rem] bg-slate-200 animate-pulse shadow-2xl" />
     );
   }
 
-  const status = getStatus(heatIndex || 35);
+  // Fallback to default if weather is null
+  const heatIndex = weather?.heatIndex ?? 35;
+  const temp = weather?.temp ?? 31;
+  const status = getStatus(heatIndex);
 
   return (
     <div className={`w-80 h-75 flex flex-col justify-between p-8 rounded-[2rem] text-white bg-gradient-to-br ${status.color} shadow-2xl relative overflow-hidden transition-all duration-700`}>
       <div className="relative z-10">
-
+        
+        {/* Header */}
         <p className="text-xs font-black opacity-70 uppercase tracking-[0.2em]">
           Metro Manila Heat Index
         </p>
         
-        <div className="flex items-baseline">
-          <h2 className="text-[125px] font-black tracking-tighter">
+        {/* Big Heat Index (Hero Number) */}
+        <div className="mt-4 mb-2flex items-baseline">
+          <h2 className="text-[125px] font-black tracking-tighter leading-none">
             {heatIndex}<span className="text-4xl ml-1">°C</span>
           </h2>
         </div>
 
+        {/* Actual Temperature Subtext */}
+        <p className="text-lg font-bold opacity-80 -mt-2 mb-6">
+          Feels Like: <span className="font-black">{temp}°C</span>
+        </p>
+
+        {/* Status Label */}
         <div className="flex flex-col md:flex-row md:items-center">
           <span className="w-fit px-5 py-1.5 bg-white/20 backdrop-blur-md rounded-full text-xs font-black uppercase tracking-widest border border-white/30">
             {status.label}
@@ -75,6 +93,7 @@ export default function WeatherBadge() {
         </div>
       </div>
 
+      {/* Decorative Glow */}
       <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-white/10 rounded-full blur-3xl" />
     </div>
   );
