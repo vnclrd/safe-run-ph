@@ -5,6 +5,14 @@ export default function RunCommendation({
   loading,
   status,
 }: any) {
+  const getMessageSize = (text: string) => {
+    const length = text?.length || 0;
+    if (length < 60) return "text-xl sm:text-2xl";
+    if (length < 120) return "text-lg sm:text-xl";
+    if (length < 180) return "text-base sm:text-lg";
+    return "text-sm sm:text-base";
+  };
+
   if (loading) {
     return (
       <div className="w-full h-75 flex flex-col justify-between p-8 rounded-[2rem] bg-white border border-slate-100 shadow-sm relative overflow-hidden">
@@ -26,29 +34,39 @@ export default function RunCommendation({
   }
 
   return (
-    <div className="w-full h-auto min-h-[18.75rem] md:h-75 flex flex-col p-6 sm:p-8 rounded-[2rem] bg-white border border-slate-100 shadow-sm relative overflow-hidden transition-all duration-700">
+    <div className="w-full h-75 flex flex-col p-6 sm:p-8 rounded-[2rem] bg-white border border-slate-100 shadow-sm relative overflow-hidden transition-all duration-700">
       <div
-        className={`relative z-10 flex flex-col h-full items-center sm:items-start text-center sm:text-left transition-all duration-1000 ease-out transform ${
-          !recommendation ? "opacity-0 translate-y-4" : "opacity-100 translate-y-0"
+        className={`relative z-10 flex flex-col h-full transition-all duration-1000 ease-out transform ${
+          !recommendation
+            ? "opacity-0 translate-y-4"
+            : "opacity-100 translate-y-0"
         }`}
       >
-        <p className="w-full text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center sm:text-left mb-2">
           RunCommendation
         </p>
 
-        <div className="flex-grow flex flex-col justify-center items-center sm:items-start">
+        <div className="flex-grow flex flex-col justify-center items-center sm:items-start space-y-2 sm:space-y-4 overflow-hidden">
           <h2
-            className={`text-4xl sm:text-5xl md:text-4xl font-black tracking-tight leading-tight mt-2 sm:mt-4 line-clamp-2 ${status.textColor}`}
+            className={`text-3xl sm:text-5xl font-black tracking-tight leading-none text-center sm:text-left ${status.textColor}
+            `}
           >
             {recommendation?.title}
           </h2>
-          
-          <p className="h-35 text-md sm:text-lg font-bold text-slate-600 leading-relaxed mt-6 sm:mt-6 md:mt-6 md:line-clamp-3">
+
+          <p
+            className={`
+              ${getMessageSize(recommendation?.message)} 
+              font-bold text-slate-600 leading-tight sm:leading-relaxed text-center sm:text-left
+              line-clamp-5 sm:line-clamp-4
+            `}
+          >
             {recommendation?.message}
           </p>
         </div>
       </div>
 
+      {/* Progress Line */}
       <div
         className={`absolute bottom-0 left-0 w-full h-2 bg-gradient-to-r transition-opacity duration-1000 ease-out ${
           !recommendation ? "opacity-0" : "opacity-100"

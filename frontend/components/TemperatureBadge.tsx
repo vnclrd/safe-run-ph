@@ -32,12 +32,12 @@ export default function TemperatureBadge({
               {weather?.temp}
             </span>
             <span className="text-2xl sm:text-3xl md:text-4xl font-black opacity-80">
-              °c
+              °C
             </span>
           </div>
 
           <p className="text-base sm:text-lg font-bold opacity-90 mt-4 md:mt-2">
-            Heat Index: {weather?.heatIndex}°c
+            Heat Index: {weather?.heatIndex}°C
           </p>
         </div>
 

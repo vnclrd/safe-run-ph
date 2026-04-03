@@ -59,7 +59,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-slate-50 p-4 sm:p-8 md:p-16">
       <h1
-        className={`text-2xl font-black italic uppercase mb-8 md:mb-12 ${status.textColor}`}
+        className={`w-full text-center mt-6 sm:mt-0 md:mt-0 md:text-left text-2xl font-black italic uppercase mb-8 md:mb-12 ${status.textColor}`}
       >
         SAFE-RUN PH
       </h1>
