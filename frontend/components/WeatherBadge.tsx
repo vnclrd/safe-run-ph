@@ -1,57 +1,17 @@
 "use client";
-import { useEffect, useState } from "react";
-import { httpsCallable } from "firebase/functions";
-import { functions } from "@/lib/firebase";
 
-// Define the shape of the data returning from your Cloud Function
-interface WeatherData {
-  temp: number;
-  heatIndex: number;
+interface WeatherBadgeProps {
+  weather: { temp: number; heatIndex: number } | null;
+  loading: boolean;
+  status: {
+    label: string;
+    bgGradient: string;
+    textColor: string;
+  };
 }
 
-export default function WeatherBadge() {
-  const [weather, setWeather] = useState<WeatherData | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchLiveWeather() {
-      try {
-        // 1. Reference the deployed 'getLiveWeather' function
-        const getLiveWeather = httpsCallable(functions, "getLiveWeather");
-        
-        // 2. Call the function
-        const result = await getLiveWeather();
-        
-        // 3. Cast the data (now contains both temp and heatIndex)
-        const data = result.data as WeatherData;
-        setWeather(data);
-      } catch (err) {
-        console.error("Cloud Function Error:", err);
-        // Safe fallbacks for Metro Manila if the API fails
-        setWeather({ temp: 31, heatIndex: 35 }); 
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchLiveWeather();
-  }, []);
-
-  const getStatus = (index: number) => {
-    if (index >= 41) return { 
-      label: "DANGER", 
-      color: "from-red-600 to-rose-700"
-    };
-    if (index >= 33) return { 
-      label: "CAUTION", 
-      color: "from-amber-400 to-orange-500" 
-    };
-    return { 
-      label: "GOOD", 
-      color: "from-emerald-500 to-teal-600"
-    };
-  };
-
+export default function WeatherBadge({ weather, loading, status }: WeatherBadgeProps) {
+  
   // Loading State
   if (loading) {
     return (
@@ -60,12 +20,11 @@ export default function WeatherBadge() {
   }
 
   // Fallback to default if weather is null
-  const heatIndex = weather?.heatIndex ?? 35;
-  const temp = weather?.temp ?? 31;
-  const status = getStatus(heatIndex);
+  const heatIndex = weather?.heatIndex ?? "N/A";
+  const temp = weather?.temp ?? "N/A";
 
   return (
-    <div className={`w-80 h-75 flex flex-col justify-between p-8 rounded-[2rem] text-white bg-gradient-to-br ${status.color} shadow-2xl relative overflow-hidden transition-all duration-700`}>
+    <div className={`w-80 h-75 flex flex-col justify-between p-8 rounded-[2rem] text-white bg-gradient-to-br ${status.bgGradient} shadow-2xl relative overflow-hidden transition-all duration-700`}>
       <div className="relative z-10">
         
         {/* Header */}
@@ -74,7 +33,7 @@ export default function WeatherBadge() {
         </p>
         
         {/* Big Heat Index (Hero Number) */}
-        <div className="mt-4 mb-2flex items-baseline">
+        <div className="mt-4 mb-2 flex items-baseline">
           <h2 className="text-[125px] font-black tracking-tighter leading-none">
             {heatIndex}<span className="text-4xl ml-1">°C</span>
           </h2>
@@ -82,7 +41,7 @@ export default function WeatherBadge() {
 
         {/* Actual Temperature Subtext */}
         <p className="text-lg font-bold opacity-80 -mt-2 mb-6">
-          Feels Like: <span className="font-black">{temp}°C</span>
+          Actual: <span className="font-black">{temp}°C</span>
         </p>
 
         {/* Status Label */}
