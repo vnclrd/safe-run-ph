@@ -22,13 +22,13 @@ export default function Home() {
 
         const heatIndex = weatherData.temp;
         let category: "GOOD" | "CAUTION" | "DANGER" = "GOOD";
-        
+
         if (heatIndex >= 41) category = "DANGER";
         else if (heatIndex >= 33) category = "CAUTION";
 
         const pool = (recommendations as any)[category];
         const randomAdvice = pool[Math.floor(Math.random() * pool.length)];
-        
+
         setRecommendation(randomAdvice);
       } catch (err) {
         console.error("Safe-Run Error:", err);
@@ -37,30 +37,56 @@ export default function Home() {
     init();
   }, []);
 
-  const status = weather?.temp >= 41 
-    ? { bgGradient: "from-red-600 to-rose-700", textColor: "text-red-600", label: "DANGER" }
-    : weather?.temp >= 33 
-    ? { bgGradient: "from-amber-400 to-orange-500", textColor: "text-orange-500", label: "CAUTION" }
-    : { bgGradient: "from-emerald-500 to-teal-600", textColor: "text-emerald-600", label: "GOOD" };
+  const status =
+    weather?.temp >= 41
+      ? {
+          bgGradient: "from-red-600 to-rose-700",
+          textColor: "text-red-600",
+          label: "DANGER",
+        }
+      : weather?.temp >= 33
+        ? {
+            bgGradient: "from-amber-400 to-orange-500",
+            textColor: "text-orange-500",
+            label: "CAUTION",
+          }
+        : {
+            bgGradient: "from-emerald-500 to-teal-600",
+            textColor: "text-emerald-600",
+            label: "GOOD",
+          };
 
   return (
     <main className="min-h-screen bg-slate-50 p-8 md:p-16">
-      <h1 className={`text-2xl font-black italic uppercase mb-12 ${status.textColor}`}>
+      <h1
+        className={`text-2xl font-black italic uppercase mb-12 ${status.textColor}`}
+      >
         SAFE-RUN PH
       </h1>
-      
+
       {/* Container Grid */}
       <div className="max-w-6xl mx-auto grid lg:grid-cols-3 gap-8">
-        
         {/* ROW 1: Quick Stats */}
-        <TemperatureBadge weather={weather} loading={weatherLoading} status={status} />
+        <TemperatureBadge
+          weather={weather}
+          loading={weatherLoading}
+          status={status}
+        />
         <div className="lg:col-span-2">
-          <RunCommendation recommendation={recommendation} loading={weatherLoading} status={status} />
+          <RunCommendation
+            recommendation={recommendation}
+            loading={weatherLoading}
+            status={status}
+          />
         </div>
 
         {/* ROW 2: Deep Dive (Scrollable) */}
-        <div className="lg:col-span-3 mt-4">
-          <WeatherForecastCard weather={weather} loading={weatherLoading} />
+        <div className="lg:col-span-3">
+          <WeatherForecastCard
+            weather={weather}
+            loading={weatherLoading}
+            status={status}
+          />
         </div>
 
         {/* Footer / Space for extra scroll */}
@@ -69,7 +95,6 @@ export default function Home() {
             Safe-Run PH
           </p>
         </div>
-
       </div>
     </main>
   );
