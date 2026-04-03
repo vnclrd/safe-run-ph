@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { httpsCallable } from "firebase/functions";
-import { functions } from "@/lib/firebase"; // Ensure this path points to your firebase config
+import { functions } from "@/lib/firebase";
 
 export default function WeatherBadge() {
   const [heatIndex, setHeatIndex] = useState<number | null>(null);
@@ -33,18 +33,15 @@ export default function WeatherBadge() {
   const getStatus = (index: number) => {
     if (index >= 41) return { 
       label: "DANGER", 
-      color: "from-red-600 to-rose-700", 
-      tip: "Move to Treadmill. Extreme risk." 
+      color: "from-red-600 to-rose-700"
     };
     if (index >= 33) return { 
       label: "CAUTION", 
-      color: "from-amber-400 to-orange-500", 
-      tip: "Hydrate heavily. Stick to shade." 
+      color: "from-amber-400 to-orange-500" 
     };
     return { 
       label: "GOOD", 
-      color: "from-emerald-500 to-teal-600", 
-      tip: "Perfect for an outdoor run!" 
+      color: "from-emerald-500 to-teal-600"
     };
   };
 
@@ -58,29 +55,26 @@ export default function WeatherBadge() {
   const status = getStatus(heatIndex || 35);
 
   return (
-    <div className={`p-10 rounded-[3rem] text-white bg-gradient-to-br ${status.color} shadow-2xl relative overflow-hidden transition-all duration-700`}>
+    <div className={`w-80 h-75 flex flex-col justify-between p-8 rounded-[2rem] text-white bg-gradient-to-br ${status.color} shadow-2xl relative overflow-hidden transition-all duration-700`}>
       <div className="relative z-10">
-        <p className="text-xs font-black opacity-70 uppercase tracking-[0.2em] mb-2">
+
+        <p className="text-xs font-black opacity-70 uppercase tracking-[0.2em]">
           Metro Manila Heat Index
         </p>
         
-        <div className="flex items-baseline gap-2">
-          <h2 className="text-8xl font-black tracking-tighter">
+        <div className="flex items-baseline">
+          <h2 className="text-[125px] font-black tracking-tighter">
             {heatIndex}<span className="text-4xl ml-1">°C</span>
           </h2>
         </div>
 
-        <div className="mt-6 flex flex-col md:flex-row md:items-center gap-4">
+        <div className="flex flex-col md:flex-row md:items-center">
           <span className="w-fit px-5 py-1.5 bg-white/20 backdrop-blur-md rounded-full text-xs font-black uppercase tracking-widest border border-white/30">
             {status.label}
           </span>
-          <p className="text-lg font-bold italic opacity-90 leading-tight">
-            {status.tip}
-          </p>
         </div>
       </div>
 
-      {/* Modern Decorative Element */}
       <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-white/10 rounded-full blur-3xl" />
     </div>
   );

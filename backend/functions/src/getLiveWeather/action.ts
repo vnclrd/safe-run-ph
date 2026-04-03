@@ -85,7 +85,7 @@ export async function fetchAndCacheWeather() {
     }
   }
 
-  // ⚠️ TEMPORARY: Bypass SSL for PAGASA's specific certificate issue
+  // Temporary Bypass SSL for PAGASA's specific certificate issue
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
   try {
