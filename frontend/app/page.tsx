@@ -40,8 +40,28 @@ export default function Home() {
     updateGreeting();
 
     async function init() {
+      const getCoords = (): Promise<{ lat: number; lon: number } | null> => {
+        return new Promise((resolve) => {
+          if (!navigator.geolocation) return resolve(null);
+          navigator.geolocation.getCurrentPosition(
+            (pos) =>
+              resolve({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
+            () => resolve(null), // Default if denied
+            { timeout: 5000 },
+          );
+        });
+      };
+
       try {
-        const res = (await httpsCallable(functions, "getLiveWeather")()) as any;
+        const coords = await getCoords();
+        const res = (await httpsCallable(
+          functions,
+          "getLiveWeather",
+        )({
+          lat: coords?.lat,
+          lon: coords?.lon,
+        })) as any;
+
         const weatherData = res.data;
         setWeather(weatherData);
         setWeatherLoading(false);
@@ -158,10 +178,10 @@ export default function Home() {
     <main className="min-h-screen bg-slate-50 overflow-x-hidden pt-8 pl-8 pr-8 sm:pt-4 sm:pl-16 sm:pr-16">
       <div
         className={`
-        flex items-center justify-center rounded-[2rem] overflow-hidden 
-        transition-all duration-1000 ease-in-out
-        ${showHero ? "h-[90dvh] mb-4" : "h-[10dvh] sm:h-[25dvh] md:h-[10dvh] md:mt-4 mb-4 md:mb-8"}
-      `}
+    flex items-center justify-center rounded-[2rem] overflow-hidden 
+    transition-all duration-1000 ease-in-out
+    ${showHero ? "h-[90dvh] mb-4" : "h-[15dvh] sm:h-[25dvh] md:h-[10dvh] md:mt-4 mb-4 md:mb-8"}
+  `}
       >
         <h2
           className={`

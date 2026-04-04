@@ -1,7 +1,12 @@
 "use client";
+import { Thermometer } from "lucide-react";
 
 interface TemperatureBadgeProps {
-  weather: { temp: number; heatIndex: number } | null;
+  weather: {
+    temp: number;
+    heatIndex: number;
+    locationLabel: string;
+  } | null;
   loading: boolean;
   status: { label: string; bgGradient: string; textColor: string };
 }
@@ -23,9 +28,12 @@ export default function TemperatureBadge({
     >
       <div className="relative z-10 flex flex-col justify-between h-full items-center sm:items-start text-center sm:text-left">
         <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80 mb-1">
-            Temperature in Metro Manila
-          </p>
+          <div className="flex items-center gap-1.5 opacity-80 mb-1 justify-center sm:justify-start">
+            <Thermometer size={12} strokeWidth={3} />
+            <p className="text-[10px] font-black uppercase tracking-[0.2em]">
+              Temperature
+            </p>
+          </div>
 
           <div className="flex items-baseline gap-1 justify-center sm:justify-start">
             <span className="text-9xl sm:text-8xl md:text-9xl mt-6 sm:mt-0 md:mt-2 font-black tracking-tighter">
@@ -41,17 +49,11 @@ export default function TemperatureBadge({
           </p>
         </div>
 
-
-
-
         <div className="flex justify-center sm:justify-start">
           <span className="px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-md text-[10px] font-black uppercase tracking-widest border border-white/20">
-            {status.label}
+            {weather?.locationLabel || "Metro Manila"}
           </span>
         </div>
-
-
-
       </div>
     </div>
   );
