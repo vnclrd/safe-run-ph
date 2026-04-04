@@ -9,6 +9,60 @@ import recommendations from "@/lib/recommendations.json";
 import metricMsgs from "@/lib/metrics.json";
 import { Droplets, CloudRain, Sun, Wind } from "lucide-react";
 
+function MiniMetricCard({
+  label,
+  value,
+  description,
+  colorClass,
+  icon: Icon,
+  progress,
+}: any) {
+  const getBgClass = (textClass: string) => {
+    const map: Record<string, string> = {
+      "text-emerald-500": "bg-emerald-500",
+      "text-blue-500": "bg-blue-500",
+      "text-amber-500": "bg-amber-500",
+      "text-orange-500": "bg-orange-500",
+      "text-rose-500": "bg-rose-500",
+      "text-slate-400": "bg-slate-400",
+    };
+    return map[textClass] || "bg-slate-200";
+  };
+
+  const bgMeterClass = getBgClass(colorClass);
+
+  return (
+    <div className="gap-2 flex flex-col justify-center items-center p-4 rounded-[1.5rem] bg-white border border-slate-100 shadow-sm transition-all duration-700">
+      <div className="flex items-center gap-1.5 text-slate-400 mb-1">
+        {Icon && <Icon size={12} strokeWidth={3} />}
+        <p className="text-[10px] font-black uppercase tracking-widest">
+          {label}
+        </p>
+      </div>
+
+      <p
+        className={`text-3xl sm:text-2xl font-black italic ${colorClass} leading-none`}
+      >
+        {value}
+      </p>
+
+      {/* UV Meter */}
+      {progress !== undefined && (
+        <div className="w-full h-1.5 bg-slate-100 rounded-full mt-2 overflow-hidden border border-slate-50">
+          <div
+            className={`h-full bg-gradient-to-r from-emerald-400 via-amber-400 to-rose-500 transition-all duration-1000 ease-out rounded-full`}
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      )}
+
+      <p className="text-[10px] font-medium text-slate-400 mt-2 text-center leading-tight">
+        {description}
+      </p>
+    </div>
+  );
+}
+
 export default function Home() {
   const [weather, setWeather] = useState<any>(null);
   const [recommendation, setRecommendation] = useState<any>(null);
@@ -70,27 +124,42 @@ export default function Home() {
           setShowHero(false);
         }, 1000);
 
-        const heatIndex = weatherData.temp;
+        const temp = weatherData.temp || weatherData.heatIndex;
+        const precip = weatherData.precip || 0;
+        const wind = weatherData.windSpeed || 0;
+        const uv = weatherData.uvIndex || 0;
+        const hum = weatherData.humidity || 0;
+
+        // 🚨 5-METRIC VOTING ESCALATION LOGIC
+        const extremeHeat = temp >= 42 ? 1 : 0;
+        const extremePrecip = precip >= 7.6 ? 1 : 0;
+        const extremeWind = wind >= 39 ? 1 : 0;
+        const extremeUV = uv >= 11 ? 1 : 0;
+        const extremeHumid = hum >= 85 ? 1 : 0;
+
+        const extremeCount =
+          extremeHeat + extremePrecip + extremeWind + extremeUV + extremeHumid;
+
         let category: "CHILLY" | "GOOD" | "CAUTION" | "DANGER" = "GOOD";
 
-        if (heatIndex >= 42) category = "DANGER";
-        else if (heatIndex >= 33) category = "CAUTION";
-        else if (heatIndex >= 27) category = "GOOD";
-        else category = "CHILLY";
+        if (extremeCount >= 3) {
+          category = "DANGER";
+        } else if (extremeCount >= 1) {
+          category = "CAUTION";
+        } else {
+          category = temp < 26 ? "CHILLY" : "GOOD";
+        }
 
-        // ADVANCED MULTI-METRIC EVALUATION
-        const isRainy = weatherData.precip > 0;
-        const isHeavyRain = weatherData.precip >= 7.6; // Heavy rain limits visibility
-        const isWindy = weatherData.windSpeed >= 29; // Fresh breeze begins to sway trees
-        const isSevereWind = weatherData.windSpeed >= 39; // Strong breeze makes running difficult
-        const isSunny = weatherData.uvIndex >= 6; // High UV requires essential protection
-        const isExtremeUV = weatherData.uvIndex >= 11; // Extreme UV burns skin in minutes
-        const isHumid = weatherData.humidity > 65; // Air feels thick and muggy
+        // ADVANCED MULTI-METRIC SUB-CATEGORY EVALUATION
+        const isRainy = precip > 0;
+        const isWindy = wind >= 29;
+        const isSunny = uv >= 6;
+        const isHumid = hum > 65;
 
         let subCategory = "optimal";
 
         // 1. Extreme Hazard Override
-        if (isHeavyRain || isSevereWind || isExtremeUV) subCategory = "extreme";
+        if (category === "DANGER") subCategory = "extreme";
         // 2. Dual-Condition Combos
         else if (isRainy && isWindy) subCategory = "rainy_windy";
         else if (isSunny && isHumid) subCategory = "sunny_humid";
@@ -114,52 +183,60 @@ export default function Home() {
           return pool[Math.floor(Math.random() * pool.length)];
         };
 
-        const h = weatherData.humidity || 0;
-        const hLvl = h < 30 ? "low" : h <= 60 ? "optimal" : "high";
+        // METRIC COLOR & DESCRIPTION LOGIC
+
+        // Humidity
+        const hLvl = hum < 30 ? "low" : hum <= 60 ? "optimal" : "high";
         setHumidityDesc(getRand("humidity", hLvl));
         setHumidityColor(
-          hLvl === "optimal"
-            ? "text-emerald-500"
-            : hLvl === "low"
-              ? "text-blue-500"
+          hum >= 85
+            ? "text-rose-500"
+            : hLvl === "optimal"
+              ? "text-emerald-500"
+              : hLvl === "low"
+                ? "text-blue-500"
+                : "text-amber-500",
+        );
+
+        // Precipitation
+        const pLvl = precip === 0 ? "dry" : precip < 7.6 ? "light" : "heavy";
+        setPrecipDesc(getRand("precipitation", pLvl));
+        setPrecipColor(
+          precip >= 7.6
+            ? "text-rose-500"
+            : pLvl === "dry"
+              ? "text-emerald-500"
               : "text-amber-500",
         );
 
-        const p = weatherData.precip || 0;
-        const pLvl = p === 0 ? "dry" : p < 7.6 ? "light" : "heavy";
-        setPrecipDesc(getRand("precipitation", pLvl));
-        setPrecipColor(
-          pLvl === "dry"
-            ? "text-emerald-500"
-            : pLvl === "light"
-              ? "text-amber-500"
-              : "text-rose-500",
-        );
-
-        const uv = weatherData.uvIndex || 0;
+        // UV Index
         const uvLvl =
           uv <= 2 ? "low" : uv <= 5 ? "moderate" : uv <= 7 ? "high" : "extreme";
         setUvDesc(getRand("uvIndex", uvLvl));
-        const uvColors = {
-          low: "text-emerald-500",
-          moderate: "text-amber-500",
-          high: "text-orange-500",
-          extreme: "text-rose-500",
-        };
-        setUvColor((uvColors as any)[uvLvl]);
+        setUvColor(
+          uv >= 11
+            ? "text-rose-500"
+            : uv >= 8
+              ? "text-orange-500"
+              : uv >= 3
+                ? "text-amber-500"
+                : "text-emerald-500",
+        );
 
         const calculatedPercent = Math.min((uv / 11) * 100, 100);
         setUvPercent(calculatedPercent);
 
-        const w = weatherData.windSpeed || 0;
-        const wLvl = w < 12 ? "calm" : w <= 28 ? "breezy" : "windy";
+        // Wind Speed
+        const wLvl = wind < 12 ? "calm" : wind <= 28 ? "breezy" : "windy";
         setWindDesc(getRand("windSpeed", wLvl));
         setWindColor(
-          wLvl === "calm"
-            ? "text-emerald-500"
-            : wLvl === "breezy"
-              ? "text-amber-500"
-              : "text-rose-500",
+          wind >= 39
+            ? "text-rose-500"
+            : wind >= 29
+              ? "text-orange-500"
+              : wind >= 12
+                ? "text-amber-500"
+                : "text-emerald-500",
         );
       } catch (err) {
         console.error("Safe-Run Error:", err);
@@ -170,35 +247,59 @@ export default function Home() {
     init();
   }, []);
 
-  const status = !weather
-    ? {
-        bgGradient: "bg-slate-200",
-        textColor: "text-slate-400",
-        label: "LOADING",
-      }
-    : weather.temp >= 40
-      ? {
-          bgGradient: "from-red-600 to-rose-700",
-          textColor: "text-red-600",
-          label: "DANGER",
-        }
-      : weather.temp >= 33
-        ? {
-            bgGradient: "from-amber-400 to-orange-500",
-            textColor: "text-orange-500",
-            label: "CAUTION",
-          }
-        : weather.temp >= 26
-          ? {
-              bgGradient: "from-emerald-500 to-teal-600",
-              textColor: "text-emerald-600",
-              label: "GOOD",
-            }
-          : {
-              bgGradient: "from-blue-500 to-indigo-600",
-              textColor: "text-blue-600",
-              label: "CHILLY",
-            };
+  // DYNAMIC GLOBAL STATUS (Drives the Hero and Badge Colors)
+  let status = {
+    bgGradient: "bg-slate-200",
+    textColor: "text-slate-400",
+    label: "LOADING",
+  };
+
+  if (weather) {
+    const temp = weather.temp || weather.heatIndex;
+    const precip = weather.precip || 0;
+    const wind = weather.windSpeed || 0;
+    const uv = weather.uvIndex || 0;
+    const hum = weather.humidity || 0;
+
+    const extremeHeat = temp >= 42 ? 1 : 0;
+    const extremePrecip = precip >= 7.6 ? 1 : 0;
+    const extremeWind = wind >= 39 ? 1 : 0;
+    const extremeUV = uv >= 11 ? 1 : 0;
+    const extremeHumid = hum >= 85 ? 1 : 0;
+
+    // Calculate total extreme metrics
+    const extremeCount =
+      extremeHeat + extremePrecip + extremeWind + extremeUV + extremeHumid;
+
+    if (extremeCount >= 3) {
+      status = {
+        bgGradient: "from-red-600 to-rose-700",
+        textColor: "text-red-600",
+        label: "DANGER",
+      };
+    } else if (extremeCount >= 1) {
+      // 1 or 2 extreme metrics
+      status = {
+        bgGradient: "from-amber-400 to-orange-500",
+        textColor: "text-orange-500",
+        label: "CAUTION",
+      };
+    } else if (temp < 26) {
+      // 0 extreme metrics, check if chilly
+      status = {
+        bgGradient: "from-blue-500 to-indigo-600",
+        textColor: "text-blue-600",
+        label: "CHILLY",
+      };
+    } else {
+      // 0 extreme metrics, normal temp
+      status = {
+        bgGradient: "from-emerald-500 to-teal-600",
+        textColor: "text-emerald-600",
+        label: "GOOD",
+      };
+    }
+  }
 
   return (
     <main className="min-h-screen bg-slate-50 overflow-x-hidden pt-8 pl-8 pr-8 sm:pt-4 sm:pl-16 sm:pr-16">
@@ -255,7 +356,7 @@ export default function Home() {
           />
           <MiniMetricCard
             label="UV Index"
-            icon={Sun} // ⚡ Added Sun icon
+            icon={Sun}
             value={weatherLoading ? "---" : weather?.uvIndex || 0}
             description={weatherLoading ? "" : uvDesc}
             colorClass={weatherLoading ? "text-slate-400" : uvColor}
@@ -286,59 +387,4 @@ export default function Home() {
       </div>
     </main>
   );
-
-  // Helper Component
-  function MiniMetricCard({
-    label,
-    value,
-    description,
-    colorClass,
-    icon: Icon,
-    progress,
-  }: any) {
-    const getBgClass = (textClass: string) => {
-      const map: Record<string, string> = {
-        "text-emerald-500": "bg-emerald-500",
-        "text-blue-500": "bg-blue-500",
-        "text-amber-500": "bg-amber-500",
-        "text-orange-500": "bg-orange-500",
-        "text-rose-500": "bg-rose-500",
-        "text-slate-400": "bg-slate-400",
-      };
-      return map[textClass] || "bg-slate-200";
-    };
-
-    const bgMeterClass = getBgClass(colorClass);
-
-    return (
-      <div className="gap-2 flex flex-col justify-center items-center p-4 rounded-[1.5rem] bg-white border border-slate-100 shadow-sm transition-all duration-700">
-        <div className="flex items-center gap-1.5 text-slate-400 mb-1">
-          {Icon && <Icon size={12} strokeWidth={3} />}
-          <p className="text-[10px] font-black uppercase tracking-widest">
-            {label}
-          </p>
-        </div>
-
-        <p
-          className={`text-3xl sm:text-2xl font-black italic ${colorClass} leading-none`}
-        >
-          {value}
-        </p>
-
-        {/* UV Meter */}
-        {progress !== undefined && (
-          <div className="w-full h-1.5 bg-slate-100 rounded-full mt-2 overflow-hidden border border-slate-50">
-            <div
-              className={`h-full bg-gradient-to-r from-emerald-400 via-amber-400 to-rose-500 transition-all duration-1000 ease-out rounded-full`}
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-        )}
-
-        <p className="text-[10px] font-medium text-slate-400 mt-2 text-center leading-tight">
-          {description}
-        </p>
-      </div>
-    );
-  }
 }
