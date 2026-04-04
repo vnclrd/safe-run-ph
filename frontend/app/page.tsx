@@ -124,20 +124,25 @@ export default function Home() {
     init();
   }, []);
 
-  const status =
-    weather?.temp >= 40
+  const status = !weather
+    ? {
+        bgGradient: "bg-slate-200",
+        textColor: "text-slate-400",
+        label: "LOADING",
+      }
+    : weather.temp >= 40
       ? {
           bgGradient: "from-red-600 to-rose-700",
           textColor: "text-red-600",
           label: "DANGER",
         }
-      : weather?.temp >= 33
+      : weather.temp >= 33
         ? {
             bgGradient: "from-amber-400 to-orange-500",
             textColor: "text-orange-500",
             label: "CAUTION",
           }
-        : weather?.temp >= 26
+        : weather.temp >= 26
           ? {
               bgGradient: "from-emerald-500 to-teal-600",
               textColor: "text-emerald-600",
@@ -269,7 +274,7 @@ export default function Home() {
         </div>
 
         <p
-          className={`text-3xl sm:text-3xl font-black italic ${colorClass} leading-none`}
+          className={`text-3xl sm:text-2xl font-black italic ${colorClass} leading-none`}
         >
           {value}
         </p>
