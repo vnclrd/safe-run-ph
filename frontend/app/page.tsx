@@ -4,64 +4,10 @@ import { httpsCallable } from "firebase/functions";
 import { functions } from "@/lib/firebase";
 import TemperatureBadge from "@/components/TemperatureBadge";
 import RunCommendation from "@/components/RunCommendation";
+import MetricGrid from "@/components/MetricGrid";
 import WeatherForecastCard from "@/components/WeatherForecastCard";
 import recommendations from "@/lib/recommendations.json";
 import metricMsgs from "@/lib/metrics.json";
-import { Droplets, CloudRain, Sun, Wind } from "lucide-react";
-
-function MiniMetricCard({
-  label,
-  value,
-  description,
-  colorClass,
-  icon: Icon,
-  progress,
-}: any) {
-  const getBgClass = (textClass: string) => {
-    const map: Record<string, string> = {
-      "text-emerald-500": "bg-emerald-500",
-      "text-blue-500": "bg-blue-500",
-      "text-amber-500": "bg-amber-500",
-      "text-orange-500": "bg-orange-500",
-      "text-rose-500": "bg-rose-500",
-      "text-slate-400": "bg-slate-400",
-    };
-    return map[textClass] || "bg-slate-200";
-  };
-
-  const bgMeterClass = getBgClass(colorClass);
-
-  return (
-    <div className="gap-2 flex flex-col justify-center items-center p-4 rounded-[1.5rem] bg-white border border-slate-100 shadow-sm transition-all duration-700">
-      <div className="flex items-center gap-1.5 text-slate-400 mb-1">
-        {Icon && <Icon size={12} strokeWidth={3} />}
-        <p className="text-[10px] font-black uppercase tracking-widest">
-          {label}
-        </p>
-      </div>
-
-      <p
-        className={`text-3xl sm:text-2xl font-black italic ${colorClass} leading-none`}
-      >
-        {value}
-      </p>
-
-      {/* UV Meter */}
-      {progress !== undefined && (
-        <div className="w-full h-1.5 bg-slate-100 rounded-full mt-2 overflow-hidden border border-slate-50">
-          <div
-            className={`h-full bg-gradient-to-r from-emerald-400 via-amber-400 to-rose-500 transition-all duration-1000 ease-out rounded-full`}
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-      )}
-
-      <p className="text-[10px] font-medium text-slate-400 mt-2 text-center leading-tight">
-        {description}
-      </p>
-    </div>
-  );
-}
 
 export default function Home() {
   const [weather, setWeather] = useState<any>(null);
@@ -339,37 +285,14 @@ export default function Home() {
           />
         </div>
 
-        <div className="grid grid-cols-2 grid-rows-2 gap-4 h-75">
-          <MiniMetricCard
-            label="Humidity"
-            icon={CloudRain}
-            value={weatherLoading ? "---" : `${weather?.humidity || 0}%`}
-            description={weatherLoading ? "" : humidityDesc}
-            colorClass={weatherLoading ? "text-slate-400" : humidityColor}
-          />
-          <MiniMetricCard
-            label="Precipitation"
-            icon={Droplets}
-            value={weatherLoading ? "---" : `${weather?.precip || 0}mm`}
-            description={weatherLoading ? "" : precipDesc}
-            colorClass={weatherLoading ? "text-slate-400" : precipColor}
-          />
-          <MiniMetricCard
-            label="UV Index"
-            icon={Sun}
-            value={weatherLoading ? "---" : weather?.uvIndex || 0}
-            description={weatherLoading ? "" : uvDesc}
-            colorClass={weatherLoading ? "text-slate-400" : uvColor}
-            progress={weatherLoading ? 0 : uvPercent}
-          />
-          <MiniMetricCard
-            label="Wind Speed"
-            icon={Wind}
-            value={weatherLoading ? "---" : `${weather?.windSpeed || 0}km/h`}
-            description={weatherLoading ? "" : windDesc}
-            colorClass={weatherLoading ? "text-slate-400" : windColor}
-          />
-        </div>
+        <MetricGrid 
+          weather={weather}
+          loading={weatherLoading}
+          humidity={{ desc: humidityDesc, color: humidityColor }}
+          precip={{ desc: precipDesc, color: precipColor }}
+          uv={{ desc: uvDesc, color: uvColor, percent: uvPercent }}
+          wind={{ desc: windDesc, color: windColor }}
+        />
 
         <div className="lg:col-span-2">
           <WeatherForecastCard
