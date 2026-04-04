@@ -79,25 +79,32 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-slate-50 pt-8 pl-8 pr-8 sm:pt-4 sm:pl-16 sm:pr-16">
-      <div 
+      <div
         className={`
           flex items-center justify-center rounded-[2rem] overflow-hidden 
-          transition-all duration-1000 ease-in-out
-          ${showHero ? "h-[90dvh] mb-4" : "h-[20dvh] sm:h-[20dvh] md:h-[35dvh] mb-4 md:mt-10 md:mb-0"}
+          transition-all duration-1000 ease-in-out h-[150px]
+          ${showHero ? "h-[90dvh] mb-4" : "h-[20dvh] md:mt-12 md:mb-8"}
         `}
       >
-        <h2 
+        <h2
           className={`
-            text-4xl sm:text-6xl
+            ${showHero ? "text-4xl sm:text-6xl" : "text-2xl md:text-3xl"}
             font-black italic uppercase leading-none text-center tracking-tighter 
             transition-all duration-1000 ease-out transform
             ${isMounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}
             ${status.textColor}
           `}
         >
-          {greeting}
-          <br />
-          Runner!
+          <span
+            className={`block transition-all duration-1000 ease-in-out ${showHero ? "text-4xl sm:text-6xl" : "text-2xl sm:text-2xl md:text-5xl lg:text-5xl"}`}
+          >
+            {greeting}
+          </span>
+          <span
+            className={`block leading-[0.75] transition-all duration-1000 ease-in-out ${showHero ? "text-6xl sm:text-8xl" : "text-5xl md:text-8xl lg:text-8xl"}`}
+          >
+            Runner!
+          </span>
         </h2>
       </div>
 

@@ -132,7 +132,7 @@ export default function WeatherForecastCard({
             return (
               <div
                 key={i}
-                ref={isNow ? nowRef : null} // Attach ref to current hour
+                ref={isNow ? nowRef : null}
                 className={`flex flex-col items-center min-w-[65px] py-3 rounded-2xl transition-all ${
                   isNow
                     ? `bg-white/10 ring-1 ring-white/30`
@@ -140,7 +140,7 @@ export default function WeatherForecastCard({
                 }`}
               >
                 <span
-                  className={`text-[10px] font-black uppercase tracking-tighter mb-2 ${isNow ? "text-white" : "text-white/60"}`}
+                  className={`text-[10px] font-black uppercase tracking-tighter mb-2 ${isNow ? status.textColor : "text-white/60"}`}
                 >
                   {isNow
                     ? "Now"
