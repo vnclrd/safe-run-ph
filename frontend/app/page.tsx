@@ -6,6 +6,7 @@ import TemperatureBadge from "@/components/TemperatureBadge";
 import RunCommendation from "@/components/RunCommendation";
 import WeatherForecastCard from "@/components/WeatherForecastCard";
 import recommendations from "@/lib/recommendations.json";
+import metricMsgs from "@/lib/metrics.json";
 
 export default function Home() {
   const [weather, setWeather] = useState<any>(null);
@@ -14,6 +15,35 @@ export default function Home() {
   const [greeting, setGreeting] = useState("Good morning,");
   const [isMounted, setIsMounted] = useState(false);
   const [showHero, setShowHero] = useState(true);
+  const [humidityDesc, setHumidityDesc] = useState("");
+  const [precipDesc, setPrecipDesc] = useState("");
+  const [uvDesc, setUvDesc] = useState("");
+  const [windDesc, setWindDesc] = useState("");
+
+  const getHumidityDesc = (h: number) => {
+    if (h < 30) return metricMsgs.humidity.low;
+    if (h <= 60) return metricMsgs.humidity.optimal;
+    return metricMsgs.humidity.high;
+  };
+
+  const getPrecipDesc = (p: number) => {
+    if (p === 0) return metricMsgs.precipitation.dry;
+    if (p < 2.5) return metricMsgs.precipitation.light;
+    return metricMsgs.precipitation.heavy;
+  };
+
+  const getUVDesc = (uv: number) => {
+    if (uv <= 2) return metricMsgs.uvIndex.low;
+    if (uv <= 5) return metricMsgs.uvIndex.moderate;
+    if (uv <= 7) return metricMsgs.uvIndex.high;
+    return metricMsgs.uvIndex.extreme;
+  };
+
+  const getWindDesc = (w: number) => {
+    if (w < 12) return metricMsgs.windSpeed.calm;
+    if (w <= 28) return metricMsgs.windSpeed.breezy;
+    return metricMsgs.windSpeed.windy;
+  };
 
   useEffect(() => {
     setIsMounted(true);
@@ -49,6 +79,33 @@ export default function Home() {
         const randomAdvice = pool[Math.floor(Math.random() * pool.length)];
 
         setRecommendation(randomAdvice);
+
+        // Pick Random Metric Descriptions
+        const getRand = (cat: string, lvl: string) => {
+          const pool = (metricMsgs as any)[cat][lvl];
+          return pool[Math.floor(Math.random() * pool.length)];
+        };
+
+        // Humidity Logic
+        const h = weatherData.humidity || 0;
+        const hLvl = h < 30 ? "low" : h <= 60 ? "optimal" : "high";
+        setHumidityDesc(getRand("humidity", hLvl));
+
+        // Precip Logic
+        const p = weatherData.precip || 0;
+        const pLvl = p === 0 ? "dry" : p < 7.6 ? "light" : "heavy";
+        setPrecipDesc(getRand("precipitation", pLvl));
+
+        // UV Logic
+        const uv = weatherData.uvIndex || 0;
+        const uvLvl =
+          uv <= 2 ? "low" : uv <= 5 ? "moderate" : uv <= 7 ? "high" : "extreme";
+        setUvDesc(getRand("uvIndex", uvLvl));
+
+        // Wind Logic
+        const w = weatherData.windSpeed || 0;
+        const wLvl = w < 12 ? "calm" : w <= 28 ? "breezy" : "windy";
+        setWindDesc(getRand("windSpeed", wLvl));
       } catch (err) {
         console.error("Safe-Run Error:", err);
         setWeatherLoading(false);
@@ -78,16 +135,16 @@ export default function Home() {
           };
 
   return (
-  <main className="min-h-screen bg-slate-50 overflow-x-hidden pt-8 pl-8 pr-8 sm:pt-4 sm:pl-16 sm:pr-16">
-    <div
-      className={`
+    <main className="min-h-screen bg-slate-50 overflow-x-hidden pt-8 pl-8 pr-8 sm:pt-4 sm:pl-16 sm:pr-16">
+      <div
+        className={`
         flex items-center justify-center rounded-[2rem] overflow-hidden 
         transition-all duration-1000 ease-in-out
         ${showHero ? "h-[90dvh] mb-4" : "h-[10dvh] sm:h-[25dvh] md:h-[10dvh] md:mt-4 mb-4 md:mb-8"}
       `}
-    >
-      <h2
-        className={`
+      >
+        <h2
+          className={`
           ${showHero ? "text-4xl sm:text-5xl md:text-6xl lg:text-6xl" : "text-3xl sm:text-2xl md:text-4xl"}
           font-black italic uppercase leading-[0.9] sm:leading-none text-center tracking-tighter 
           sm:whitespace-nowrap
@@ -95,81 +152,87 @@ export default function Home() {
           ${isMounted ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-24"}
           ${status.textColor}
         `}
-      >
-        {greeting} 
-        <br className="sm:hidden" />
-        {" "}Runner!
-      </h2>
-    </div>
-
-    <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
-      {/* --- ROW 1 --- */}
-      <TemperatureBadge
-        weather={weather}
-        loading={weatherLoading}
-        status={status}
-      />
-      <div className="lg:col-span-2">
-        <RunCommendation
-          recommendation={recommendation}
-          loading={weatherLoading}
-          status={status}
-        />
+        >
+          {greeting}
+          <br className="sm:hidden" /> Runner!
+        </h2>
       </div>
 
-      {/* --- ROW 2: Metric Grid (Left) & Forecast (Right) --- */}
-      <div className="grid grid-cols-2 grid-rows-2 gap-4 h-75">
-        <MiniMetricCard
-          label="Humidity"
-          value={weatherLoading ? "---" : `${weather?.humidity || 0}%`}
-          status={status}
-        />
-        <MiniMetricCard
-          label="Precipitation"
-          value={weatherLoading ? "---" : `${weather?.precip || 0}mm`}
-          status={status}
-        />
-        <MiniMetricCard
-          label="UV Index"
-          value={weatherLoading ? "---" : (weather?.uvIndex || 0)}
-          status={status}
-        />
-        <MiniMetricCard
-          label="Wind Speed"
-          value={weatherLoading ? "---" : `${weather?.windSpeed || 0}km/h`}
-          status={status}
-        />
-      </div>
-
-      <div className="lg:col-span-2">
-        <WeatherForecastCard
+      <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
+        {/* --- ROW 1 --- */}
+        <TemperatureBadge
           weather={weather}
           loading={weatherLoading}
           status={status}
         />
-      </div>
+        <div className="lg:col-span-2">
+          <RunCommendation
+            recommendation={recommendation}
+            loading={weatherLoading}
+            status={status}
+          />
+        </div>
 
-      {/* --- FOOTER --- */}
-      <div className="lg:col-span-3 py-6 md:py-12 text-center">
-        <p className="text-slate-300 font-black italic uppercase text-[10px] tracking-[0.5em]">
-          Safe-Run PH
-        </p>
+        {/* --- ROW 2: Metric Grid (Left) & Forecast (Right) --- */}
+        <div className="grid grid-cols-2 grid-rows-2 gap-4 h-75">
+          <MiniMetricCard
+            label="Humidity"
+            value={weatherLoading ? "---" : `${weather?.humidity || 0}%`}
+            description={weatherLoading ? "" : humidityDesc}
+            status={status}
+          />
+          <MiniMetricCard
+            label="Precipitation"
+            value={weatherLoading ? "---" : `${weather?.precip || 0}mm`}
+            description={weatherLoading ? "" : precipDesc}
+            status={status}
+          />
+          <MiniMetricCard
+            label="UV Index"
+            value={weatherLoading ? "---" : weather?.uvIndex || 0}
+            description={weatherLoading ? "" : uvDesc}
+            status={status}
+          />
+          <MiniMetricCard
+            label="Wind Speed"
+            value={weatherLoading ? "---" : `${weather?.windSpeed || 0}km/h`}
+            description={weatherLoading ? "" : windDesc}
+            status={status}
+          />
+        </div>
+
+        <div className="lg:col-span-2">
+          <WeatherForecastCard
+            weather={weather}
+            loading={weatherLoading}
+            status={status}
+          />
+        </div>
+
+        {/* --- FOOTER --- */}
+        <div className="lg:col-span-3 py-6 md:py-12 text-center">
+          <p className="text-slate-300 font-black italic uppercase text-[10px] tracking-[0.5em]">
+            Safe-Run PH
+          </p>
+        </div>
       </div>
-    </div>
-  </main>
-);
+    </main>
+  );
 
   // Helper Component for the 4 Small Cards
-  function MiniMetricCard({ label, value, status }: any) {
+  function MiniMetricCard({ label, value, description, status }: any) {
     return (
-      <div className="flex flex-col justify-center items-center p-4 rounded-[1.5rem] bg-white border border-slate-100 shadow-sm transition-all duration-700">
-        <p className="text-[8px] font-black uppercase tracking-widest text-slate-400 mb-1">
+      <div className="gap-4 flex flex-col justify-center items-center p-4 rounded-[1.5rem] bg-white border border-slate-100 shadow-sm transition-all duration-700">
+        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">
           {label}
         </p>
         <p
-          className={`text-xl sm:text-2xl font-black italic ${status.textColor}`}
+          className={`text-3xl sm:text-4xl font-black italic ${status.textColor} leading-none`}
         >
           {value}
+        </p>
+        <p className="text-[10px] font-medium text-slate-400 mt-2 text-center leading-tight">
+          {description}
         </p>
       </div>
     );
