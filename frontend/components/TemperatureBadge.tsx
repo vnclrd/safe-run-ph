@@ -1,5 +1,6 @@
 "use client";
-import { Thermometer } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Thermometer, MapPin, Clock2 } from "lucide-react";
 
 interface TemperatureBadgeProps {
   weather: {
@@ -16,6 +17,32 @@ export default function TemperatureBadge({
   loading,
   status,
 }: TemperatureBadgeProps) {
+  // State to hold the live time
+  const [time, setTime] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Helper to format time as 0:00:00 AM/PM
+    const formatTime = () => {
+      return new Date().toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true,
+      });
+    };
+
+    // Set initial time immediately on mount
+    setTime(formatTime());
+
+    // Update time every second
+    const timer = setInterval(() => {
+      setTime(formatTime());
+    }, 1000);
+
+    // Cleanup interval on component unmount
+    return () => clearInterval(timer);
+  }, []);
+
   if (loading) {
     return (
       <div className="w-full h-75 rounded-[2rem] bg-white animate-pulse border border-slate-100 shadow-sm" />
@@ -49,10 +76,20 @@ export default function TemperatureBadge({
           </p>
         </div>
 
-        <div className="flex justify-center sm:justify-start">
-          <span className="px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-md text-[10px] font-black uppercase tracking-widest border border-white/20">
-            {weather?.locationLabel || "Metro Manila"}
-          </span>
+        <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
+          <div className="flex">
+            <span className="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-md text-[10px] font-black uppercase tracking-widest border border-white/20 whitespace-nowrap">
+              <MapPin size={10} strokeWidth={3} />
+              {weather?.locationLabel || "Metro Manila"}
+            </span>
+          </div>
+
+          <div className="flex">
+            <span className="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-md text-[10px] font-black uppercase tracking-widest border border-white/20 whitespace-nowrap">
+              <Clock2 size={10} strokeWidth={3} />
+              {time || "--:--:-- --"}
+            </span>
+          </div>
         </div>
       </div>
     </div>

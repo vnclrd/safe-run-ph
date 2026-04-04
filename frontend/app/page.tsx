@@ -76,7 +76,7 @@ export default function Home() {
         const uv = weatherData.uvIndex || 0;
         const hum = weatherData.humidity || 0;
 
-        // 🚨 5-METRIC VOTING ESCALATION LOGIC
+        // 5-METRIC VOTING ESCALATION LOGIC
         const extremeHeat = temp >= 42 ? 1 : 0;
         const extremePrecip = precip >= 7.6 ? 1 : 0;
         const extremeWind = wind >= 39 ? 1 : 0;
@@ -255,7 +255,7 @@ export default function Home() {
           transition-all duration-1000 ease-in-out
           ${showHero ? "h-[90dvh] mb-4" : "h-[15dvh] sm:h-[25dvh] md:h-[10dvh] md:mt-4 mb-4 md:mb-8"}
         `}
-      >
+      >        
         <h2
           className={`
             ${showHero ? "text-3xl sm:text-5xl md:text-6xl lg:text-6xl" : "text-3xl sm:text-2xl md:text-4xl"}
