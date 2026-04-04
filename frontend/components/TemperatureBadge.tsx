@@ -41,11 +41,17 @@ export default function TemperatureBadge({
           </p>
         </div>
 
+
+
+
         <div className="flex justify-center sm:justify-start">
           <span className="px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-md text-[10px] font-black uppercase tracking-widest border border-white/20">
             {status.label}
           </span>
         </div>
+
+
+
       </div>
     </div>
   );

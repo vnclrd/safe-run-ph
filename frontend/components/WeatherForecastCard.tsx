@@ -25,18 +25,14 @@ export default function WeatherForecastCard({
   const nowRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
-  // 1. Handle Entry Animation & Auto-scroll to "Now"
   useEffect(() => {
     if (!loading && weather?.hourly) {
-      // Trigger fade-in
       const timer = setTimeout(() => setIsVisible(true), 100);
 
-      // Auto-scroll to the "Now" element
       if (nowRef.current && scrollRef.current) {
         const container = scrollRef.current;
         const target = nowRef.current;
 
-        // Calculate: Target position - half of container width + half of target width
         const scrollPos =
           target.offsetLeft -
           container.offsetWidth / 2 +
@@ -48,7 +44,6 @@ export default function WeatherForecastCard({
     }
   }, [loading, weather]);
 
-  // 2. Manual Scroll Logic for invisible buttons
   const scrollByAmount = (direction: "left" | "right") => {
     if (scrollRef.current) {
       const amount = direction === "left" ? -200 : 200;
@@ -94,20 +89,19 @@ export default function WeatherForecastCard({
 
   return (
     <div
-      className={`w-full ${getAccentBg()} backdrop-blur-xl border rounded-[2rem] shadow-2xl overflow-hidden p-6 transition-all duration-1000 ease-out transform ${
+      className={`w-full h-75 ${getAccentBg()} backdrop-blur-xl border rounded-[2rem] shadow-2xl overflow-hidden p-6 flex flex-col justify-center transition-all duration-1000 ease-out transform ${
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
       }`}
     >
-      <div className="flex flex-col items-center gap-1 mb-6 text-white text-center">
-        <h3 className="text-[24px] font-black uppercase tracking-tight">
+      <div className="flex flex-col items-center gap-1 mb-4 text-white text-center">
+        <h3 className="text-[20px] sm:text-[24px] font-black uppercase tracking-tight leading-none">
           Hourly Forecast
         </h3>
-        <h3 className="text-[12px] opacity-50 font-medium uppercase tracking-widest">
+        <h3 className="text-[10px] sm:text-[12px] opacity-50 font-medium uppercase tracking-widest mt-1">
           {todayDate}
         </h3>
       </div>
 
-      {/* Container with relative positioning for invisible buttons */}
       <div className="relative group">
         <button
           onClick={() => scrollByAmount("left")}
@@ -121,7 +115,6 @@ export default function WeatherForecastCard({
           aria-label="Scroll Right"
         />
 
-        {/* The Scrollable Track */}
         <div
           ref={scrollRef}
           className={`${getInnerAccentBg()} border flex overflow-x-auto gap-1.5 p-2 scrollbar-hide rounded-[1.5rem] relative`}
@@ -147,7 +140,7 @@ export default function WeatherForecastCard({
                     : `${h.time % 12 || 12}${h.time >= 12 ? "PM" : "AM"}`}
                 </span>
 
-                <span className="text-2xl mt-2">
+                <span className="text-2xl mt-1">
                   {getWeatherIcon(h.code, h.time)}
                 </span>
 
