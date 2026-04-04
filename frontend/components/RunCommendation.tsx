@@ -8,7 +8,7 @@ export default function RunCommendation({
   const getMessageSize = (text: string) => {
     const length = text?.length || 0;
     if (length < 60) return "text-xl sm:text-2xl";
-    if (length < 120) return "text-lg sm:text-xl";
+    if (length < 120) return "text-md sm:text-xl";
     if (length < 180) return "text-base sm:text-lg";
     return "text-sm sm:text-base";
   };
@@ -42,14 +42,15 @@ export default function RunCommendation({
             : "opacity-100 translate-y-0"
         }`}
       >
+        {/* 1. Top Label */}
         <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center sm:text-left mb-2">
           RunCommendation
         </p>
 
+        {/* 2. Middle Content */}
         <div className="flex-grow flex flex-col justify-center items-center sm:items-start space-y-2 sm:space-y-4 overflow-hidden">
           <h2
-            className={`text-3xl sm:text-5xl font-black tracking-tight leading-none text-center sm:text-left ${status.textColor}
-            `}
+            className={`text-3xl sm:text-5xl font-black tracking-tight leading-none text-center sm:text-left ${status.textColor}`}
           >
             {recommendation?.title}
           </h2>
@@ -58,7 +59,7 @@ export default function RunCommendation({
             className={`
               ${getMessageSize(recommendation?.message)} 
               font-bold text-slate-600 leading-tight sm:leading-relaxed text-center sm:text-left
-              line-clamp-5 sm:line-clamp-4
+              line-clamp-4
             `}
           >
             {recommendation?.message}
