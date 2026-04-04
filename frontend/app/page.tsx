@@ -7,6 +7,7 @@ import RunCommendation from "@/components/RunCommendation";
 import WeatherForecastCard from "@/components/WeatherForecastCard";
 import recommendations from "@/lib/recommendations.json";
 import metricMsgs from "@/lib/metrics.json";
+import { Droplets, CloudRain, Sun, Wind } from "lucide-react";
 
 export default function Home() {
   const [weather, setWeather] = useState<any>(null);
@@ -15,35 +16,15 @@ export default function Home() {
   const [greeting, setGreeting] = useState("Good morning,");
   const [isMounted, setIsMounted] = useState(false);
   const [showHero, setShowHero] = useState(true);
+  const [humidityColor, setHumidityColor] = useState("text-slate-400");
+  const [precipColor, setPrecipColor] = useState("text-slate-400");
+  const [uvColor, setUvColor] = useState("text-slate-400");
+  const [windColor, setWindColor] = useState("text-slate-400");
   const [humidityDesc, setHumidityDesc] = useState("");
   const [precipDesc, setPrecipDesc] = useState("");
   const [uvDesc, setUvDesc] = useState("");
   const [windDesc, setWindDesc] = useState("");
-
-  const getHumidityDesc = (h: number) => {
-    if (h < 30) return metricMsgs.humidity.low;
-    if (h <= 60) return metricMsgs.humidity.optimal;
-    return metricMsgs.humidity.high;
-  };
-
-  const getPrecipDesc = (p: number) => {
-    if (p === 0) return metricMsgs.precipitation.dry;
-    if (p < 2.5) return metricMsgs.precipitation.light;
-    return metricMsgs.precipitation.heavy;
-  };
-
-  const getUVDesc = (uv: number) => {
-    if (uv <= 2) return metricMsgs.uvIndex.low;
-    if (uv <= 5) return metricMsgs.uvIndex.moderate;
-    if (uv <= 7) return metricMsgs.uvIndex.high;
-    return metricMsgs.uvIndex.extreme;
-  };
-
-  const getWindDesc = (w: number) => {
-    if (w < 12) return metricMsgs.windSpeed.calm;
-    if (w <= 28) return metricMsgs.windSpeed.breezy;
-    return metricMsgs.windSpeed.windy;
-  };
+  const [uvPercent, setUvPercent] = useState(0);
 
   useEffect(() => {
     setIsMounted(true);
@@ -82,32 +63,58 @@ export default function Home() {
 
         setRecommendation(randomAdvice);
 
-        // Pick Random Metric Descriptions
         const getRand = (cat: string, lvl: string) => {
           const pool = (metricMsgs as any)[cat][lvl];
           return pool[Math.floor(Math.random() * pool.length)];
         };
 
-        // Humidity Logic
         const h = weatherData.humidity || 0;
         const hLvl = h < 30 ? "low" : h <= 60 ? "optimal" : "high";
         setHumidityDesc(getRand("humidity", hLvl));
+        setHumidityColor(
+          hLvl === "optimal"
+            ? "text-emerald-500"
+            : hLvl === "low"
+              ? "text-blue-500"
+              : "text-amber-500",
+        );
 
-        // Precip Logic
         const p = weatherData.precip || 0;
         const pLvl = p === 0 ? "dry" : p < 7.6 ? "light" : "heavy";
         setPrecipDesc(getRand("precipitation", pLvl));
+        setPrecipColor(
+          pLvl === "dry"
+            ? "text-emerald-500"
+            : pLvl === "light"
+              ? "text-amber-500"
+              : "text-rose-500",
+        );
 
-        // UV Logic
         const uv = weatherData.uvIndex || 0;
         const uvLvl =
           uv <= 2 ? "low" : uv <= 5 ? "moderate" : uv <= 7 ? "high" : "extreme";
         setUvDesc(getRand("uvIndex", uvLvl));
+        const uvColors = {
+          low: "text-emerald-500",
+          moderate: "text-amber-500",
+          high: "text-orange-500",
+          extreme: "text-rose-500",
+        };
+        setUvColor((uvColors as any)[uvLvl]);
 
-        // Wind Logic
+        const calculatedPercent = Math.min((uv / 11) * 100, 100);
+        setUvPercent(calculatedPercent);
+
         const w = weatherData.windSpeed || 0;
         const wLvl = w < 12 ? "calm" : w <= 28 ? "breezy" : "windy";
         setWindDesc(getRand("windSpeed", wLvl));
+        setWindColor(
+          wLvl === "calm"
+            ? "text-emerald-500"
+            : wLvl === "breezy"
+              ? "text-amber-500"
+              : "text-rose-500",
+        );
       } catch (err) {
         console.error("Safe-Run Error:", err);
         setWeatherLoading(false);
@@ -167,7 +174,6 @@ export default function Home() {
       </div>
 
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
-        {/* --- ROW 1 --- */}
         <TemperatureBadge
           weather={weather}
           loading={weatherLoading}
@@ -181,31 +187,35 @@ export default function Home() {
           />
         </div>
 
-        {/* --- ROW 2: Metric Grid (Left) & Forecast (Right) --- */}
         <div className="grid grid-cols-2 grid-rows-2 gap-4 h-75">
           <MiniMetricCard
             label="Humidity"
+            icon={CloudRain}
             value={weatherLoading ? "---" : `${weather?.humidity || 0}%`}
             description={weatherLoading ? "" : humidityDesc}
-            status={status}
+            colorClass={weatherLoading ? "text-slate-400" : humidityColor}
           />
           <MiniMetricCard
             label="Precipitation"
+            icon={Droplets}
             value={weatherLoading ? "---" : `${weather?.precip || 0}mm`}
             description={weatherLoading ? "" : precipDesc}
-            status={status}
+            colorClass={weatherLoading ? "text-slate-400" : precipColor}
           />
           <MiniMetricCard
             label="UV Index"
+            icon={Sun} // ⚡ Added Sun icon
             value={weatherLoading ? "---" : weather?.uvIndex || 0}
             description={weatherLoading ? "" : uvDesc}
-            status={status}
+            colorClass={weatherLoading ? "text-slate-400" : uvColor}
+            progress={weatherLoading ? 0 : uvPercent}
           />
           <MiniMetricCard
             label="Wind Speed"
+            icon={Wind}
             value={weatherLoading ? "---" : `${weather?.windSpeed || 0}km/h`}
             description={weatherLoading ? "" : windDesc}
-            status={status}
+            colorClass={weatherLoading ? "text-slate-400" : windColor}
           />
         </div>
 
@@ -217,7 +227,6 @@ export default function Home() {
           />
         </div>
 
-        {/* --- FOOTER --- */}
         <div className="lg:col-span-3 py-6 md:py-12 text-center">
           <p className="text-slate-300 font-black italic uppercase text-[10px] tracking-[0.5em]">
             Safe-Run PH
@@ -227,18 +236,54 @@ export default function Home() {
     </main>
   );
 
-  // Helper Component for the 4 Small Cards
-  function MiniMetricCard({ label, value, description, status }: any) {
+  // Helper Component
+  function MiniMetricCard({
+    label,
+    value,
+    description,
+    colorClass,
+    icon: Icon,
+    progress,
+  }: any) {
+    const getBgClass = (textClass: string) => {
+      const map: Record<string, string> = {
+        "text-emerald-500": "bg-emerald-500",
+        "text-blue-500": "bg-blue-500",
+        "text-amber-500": "bg-amber-500",
+        "text-orange-500": "bg-orange-500",
+        "text-rose-500": "bg-rose-500",
+        "text-slate-400": "bg-slate-400",
+      };
+      return map[textClass] || "bg-slate-200";
+    };
+
+    const bgMeterClass = getBgClass(colorClass);
+
     return (
-      <div className="gap-4 flex flex-col justify-center items-center p-4 rounded-[1.5rem] bg-white border border-slate-100 shadow-sm transition-all duration-700">
-        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">
-          {label}
-        </p>
+      <div className="gap-2 flex flex-col justify-center items-center p-4 rounded-[1.5rem] bg-white border border-slate-100 shadow-sm transition-all duration-700">
+        <div className="flex items-center gap-1.5 text-slate-400 mb-1">
+          {Icon && <Icon size={12} strokeWidth={3} />}
+          <p className="text-[10px] font-black uppercase tracking-widest">
+            {label}
+          </p>
+        </div>
+
         <p
-          className={`text-3xl sm:text-4xl font-black italic ${status.textColor} leading-none`}
+          className={`text-3xl sm:text-3xl font-black italic ${colorClass} leading-none`}
         >
           {value}
         </p>
+
+        {/* UV Meter */}
+        {progress !== undefined && (
+          <div className="w-full h-1.5 bg-slate-100 rounded-full mt-2 overflow-hidden border border-slate-50">
+            <div
+              className={`h-full bg-gradient-to-r from-emerald-400 via-amber-400 to-rose-500 transition-all duration-1000 ease-out rounded-full`}
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        )}
+
         <p className="text-[10px] font-medium text-slate-400 mt-2 text-center leading-tight">
           {description}
         </p>
