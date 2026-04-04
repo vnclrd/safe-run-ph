@@ -78,96 +78,88 @@ export default function Home() {
           };
 
   return (
-    <main className="min-h-screen bg-slate-50 pt-8 pl-8 pr-8 sm:pt-4 sm:pl-16 sm:pr-16">
-      {/* ⚡ Hero Transition Section (Unchanged) */}
-      <div
-        className={`
+  <main className="min-h-screen bg-slate-50 overflow-x-hidden pt-8 pl-8 pr-8 sm:pt-4 sm:pl-16 sm:pr-16">
+    <div
+      className={`
         flex items-center justify-center rounded-[2rem] overflow-hidden 
         transition-all duration-1000 ease-in-out
-        ${showHero ? "h-[90dvh] mb-4" : "h-[20dvh] sm:h-[25dvh] md:h-[25dvh] md:mt-12 md:mb-8"}
+        ${showHero ? "h-[90dvh] mb-4" : "h-[10dvh] sm:h-[25dvh] md:h-[10dvh] md:mt-4 mb-4 md:mb-8"}
       `}
-      >
-        <h2
-          className={`
-          ${showHero ? "text-4xl sm:text-6xl" : "text-2xl md:text-3xl"}
-          font-black italic uppercase leading-none text-center tracking-tighter 
-          transition-all duration-1000 ease-out transform
+    >
+      <h2
+        className={`
+          ${showHero ? "text-4xl sm:text-5xl md:text-6xl lg:text-6xl" : "text-3xl sm:text-2xl md:text-4xl"}
+          font-black italic uppercase leading-[0.9] sm:leading-none text-center tracking-tighter 
+          sm:whitespace-nowrap
+          transition-all duration-1000 ease-in-out transform
           ${isMounted ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-24"}
           ${status.textColor}
         `}
-        >
-          <span
-            className={`block transition-all duration-1000 ease-in-out ${showHero ? "text-4xl sm:text-6xl" : "text-2xl sm:text-2xl md:text-5xl lg:text-5xl"}`}
-          >
-            {greeting}
-          </span>
-          <span
-            className={`block leading-[0.75] transition-all duration-1000 ease-in-out ${showHero ? "text-6xl sm:text-8xl" : "text-5xl md:text-8xl lg:text-8xl"}`}
-          >
-            Runner!
-          </span>
-        </h2>
+      >
+        {greeting} 
+        <br className="sm:hidden" />
+        {" "}Runner!
+      </h2>
+    </div>
+
+    <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
+      {/* --- ROW 1 --- */}
+      <TemperatureBadge
+        weather={weather}
+        loading={weatherLoading}
+        status={status}
+      />
+      <div className="lg:col-span-2">
+        <RunCommendation
+          recommendation={recommendation}
+          loading={weatherLoading}
+          status={status}
+        />
       </div>
 
-      {/* 📦 Dashboard Grid */}
-      <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
-        {/* --- ROW 1 --- */}
-        <TemperatureBadge
+      {/* --- ROW 2: Metric Grid (Left) & Forecast (Right) --- */}
+      <div className="grid grid-cols-2 grid-rows-2 gap-4 h-75">
+        <MiniMetricCard
+          label="Humidity"
+          value={weatherLoading ? "---" : `${weather?.humidity || 0}%`}
+          status={status}
+        />
+        <MiniMetricCard
+          label="Precipitation"
+          value={weatherLoading ? "---" : `${weather?.precip || 0}mm`}
+          status={status}
+        />
+        <MiniMetricCard
+          label="UV Index"
+          value={weatherLoading ? "---" : (weather?.uvIndex || 0)}
+          status={status}
+        />
+        <MiniMetricCard
+          label="Wind Speed"
+          value={weatherLoading ? "---" : `${weather?.windSpeed || 0}km/h`}
+          status={status}
+        />
+      </div>
+
+      <div className="lg:col-span-2">
+        <WeatherForecastCard
           weather={weather}
           loading={weatherLoading}
           status={status}
         />
-        <div className="lg:col-span-2">
-          <RunCommendation
-            recommendation={recommendation}
-            loading={weatherLoading}
-            status={status}
-          />
-        </div>
-
-        {/* --- ROW 2: Metric Grid (Left) & Forecast (Right) --- */}
-        <div className="grid grid-cols-2 grid-rows-2 gap-4 h-75">
-          <MiniMetricCard
-            label="Humidity"
-            value={weatherLoading ? "---" : `${weather?.humidity}%`}
-            status={status}
-          />
-          <MiniMetricCard
-            label="Precipitation"
-            value={weatherLoading ? "---" : `${weather?.precip}mm`}
-            status={status}
-          />
-          <MiniMetricCard
-            label="UV Index"
-            value={weatherLoading ? "---" : weather?.uvIndex}
-            status={status}
-          />
-          <MiniMetricCard
-            label="Wind Speed"
-            value={weatherLoading ? "---" : `${weather?.windSpeed}km/h`}
-            status={status}
-          />
-        </div>
-
-        <div className="lg:col-span-2">
-          <WeatherForecastCard
-            weather={weather}
-            loading={weatherLoading}
-            status={status}
-          />
-        </div>
-
-        {/* --- FOOTER --- */}
-        <div className="lg:col-span-3 py-6 md:py-12 text-center">
-          <p className="text-slate-300 font-black italic uppercase text-[10px] tracking-[0.5em]">
-            Safe-Run PH
-          </p>
-        </div>
       </div>
-    </main>
-  );
 
-  // 📦 Helper Component for the 4 Small Cards
+      {/* --- FOOTER --- */}
+      <div className="lg:col-span-3 py-6 md:py-12 text-center">
+        <p className="text-slate-300 font-black italic uppercase text-[10px] tracking-[0.5em]">
+          Safe-Run PH
+        </p>
+      </div>
+    </div>
+  </main>
+);
+
+  // Helper Component for the 4 Small Cards
   function MiniMetricCard({ label, value, status }: any) {
     return (
       <div className="flex flex-col justify-center items-center p-4 rounded-[1.5rem] bg-white border border-slate-100 shadow-sm transition-all duration-700">
