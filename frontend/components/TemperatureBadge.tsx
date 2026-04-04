@@ -28,7 +28,7 @@ export default function TemperatureBadge({
           </p>
 
           <div className="flex items-baseline gap-1 justify-center sm:justify-start">
-            <span className="text-9xl sm:text-8xl md:text-9xl mt-4 sm:mt-0 md:mt-0 font-black tracking-tighter">
+            <span className="text-9xl sm:text-8xl md:text-9xl mt-6 sm:mt-0 md:mt-2 font-black tracking-tighter">
               {weather?.temp}
             </span>
             <span className="text-2xl sm:text-3xl md:text-4xl font-black opacity-80">
@@ -36,7 +36,7 @@ export default function TemperatureBadge({
             </span>
           </div>
 
-          <p className="text-base sm:text-lg font-bold opacity-90 mt-4 md:mt-2">
+          <p className="text-base sm:text-lg font-bold opacity-90 mt-0 md:mt-0">
             Heat Index: {weather?.heatIndex}°C
           </p>
         </div>
