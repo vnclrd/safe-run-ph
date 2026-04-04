@@ -305,23 +305,23 @@ export default function Home() {
     <main className="min-h-screen bg-slate-50 overflow-x-hidden pt-8 pl-8 pr-8 sm:pt-4 sm:pl-16 sm:pr-16">
       <div
         className={`
-    flex items-center justify-center rounded-[2rem] overflow-hidden 
-    transition-all duration-1000 ease-in-out
-    ${showHero ? "h-[90dvh] mb-4" : "h-[15dvh] sm:h-[25dvh] md:h-[10dvh] md:mt-4 mb-4 md:mb-8"}
-  `}
+          flex items-center justify-center rounded-[2rem] overflow-hidden 
+          transition-all duration-1000 ease-in-out
+          ${showHero ? "h-[90dvh] mb-4" : "h-[15dvh] sm:h-[25dvh] md:h-[10dvh] md:mt-4 mb-4 md:mb-8"}
+        `}
       >
         <h2
           className={`
-          ${showHero ? "text-4xl sm:text-5xl md:text-6xl lg:text-6xl" : "text-3xl sm:text-2xl md:text-4xl"}
-          font-black italic uppercase leading-[0.9] sm:leading-none text-center tracking-tighter 
-          sm:whitespace-nowrap
-          transition-all duration-1000 ease-in-out transform
-          ${isMounted ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-24"}
-          ${status.textColor}
-        `}
+            ${showHero ? "text-3xl sm:text-5xl md:text-6xl lg:text-6xl" : "text-3xl sm:text-2xl md:text-4xl"}
+            font-black italic uppercase leading-[0.9] sm:leading-none text-center tracking-tighter 
+            lg:whitespace-nowrap
+            transition-all duration-1000 ease-in-out transform
+            ${isMounted ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-24"}
+            ${status.textColor}
+          `}
         >
           {greeting}
-          <br className="sm:hidden" /> Runner!
+          <br className="lg:hidden" /> Runner!
         </h2>
       </div>
 
