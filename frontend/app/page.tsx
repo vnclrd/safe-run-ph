@@ -73,12 +73,38 @@ export default function Home() {
         const heatIndex = weatherData.temp;
         let category: "CHILLY" | "GOOD" | "CAUTION" | "DANGER" = "GOOD";
 
-        if (heatIndex >= 40) category = "DANGER";
+        if (heatIndex >= 42) category = "DANGER";
         else if (heatIndex >= 33) category = "CAUTION";
-        else if (heatIndex >= 26) category = "GOOD";
+        else if (heatIndex >= 27) category = "GOOD";
         else category = "CHILLY";
 
-        const pool = (recommendations as any)[category];
+        // ADVANCED MULTI-METRIC EVALUATION
+        const isRainy = weatherData.precip > 0;
+        const isHeavyRain = weatherData.precip >= 7.6; // Heavy rain limits visibility
+        const isWindy = weatherData.windSpeed >= 29; // Fresh breeze begins to sway trees
+        const isSevereWind = weatherData.windSpeed >= 39; // Strong breeze makes running difficult
+        const isSunny = weatherData.uvIndex >= 6; // High UV requires essential protection
+        const isExtremeUV = weatherData.uvIndex >= 11; // Extreme UV burns skin in minutes
+        const isHumid = weatherData.humidity > 65; // Air feels thick and muggy
+
+        let subCategory = "optimal";
+
+        // 1. Extreme Hazard Override
+        if (isHeavyRain || isSevereWind || isExtremeUV) subCategory = "extreme";
+        // 2. Dual-Condition Combos
+        else if (isRainy && isWindy) subCategory = "rainy_windy";
+        else if (isSunny && isHumid) subCategory = "sunny_humid";
+        else if (isSunny && isWindy) subCategory = "sunny_windy";
+        else if (isHumid && isWindy) subCategory = "humid_windy";
+        // 3. Single Conditions
+        else if (isRainy) subCategory = "rainy";
+        else if (isSunny) subCategory = "sunny";
+        else if (isHumid) subCategory = "humid";
+        else if (isWindy) subCategory = "windy";
+
+        const pool =
+          (recommendations as any)[category]?.[subCategory] ||
+          (recommendations as any)[category]?.["optimal"];
         const randomAdvice = pool[Math.floor(Math.random() * pool.length)];
 
         setRecommendation(randomAdvice);
