@@ -70,10 +70,12 @@ export default function Home() {
         }, 1000);
 
         const heatIndex = weatherData.temp;
-        let category: "GOOD" | "CAUTION" | "DANGER" = "GOOD";
+        let category: "CHILLY" | "GOOD" | "CAUTION" | "DANGER" = "GOOD";
 
-        if (heatIndex >= 41) category = "DANGER";
+        if (heatIndex >= 40) category = "DANGER";
         else if (heatIndex >= 33) category = "CAUTION";
+        else if (heatIndex >= 26) category = "GOOD";
+        else category = "CHILLY";
 
         const pool = (recommendations as any)[category];
         const randomAdvice = pool[Math.floor(Math.random() * pool.length)];
@@ -116,7 +118,7 @@ export default function Home() {
   }, []);
 
   const status =
-    weather?.temp >= 41
+    weather?.temp >= 40
       ? {
           bgGradient: "from-red-600 to-rose-700",
           textColor: "text-red-600",
@@ -128,11 +130,17 @@ export default function Home() {
             textColor: "text-orange-500",
             label: "CAUTION",
           }
-        : {
-            bgGradient: "from-emerald-500 to-teal-600",
-            textColor: "text-emerald-600",
-            label: "GOOD",
-          };
+        : weather?.temp >= 26
+          ? {
+              bgGradient: "from-emerald-500 to-teal-600",
+              textColor: "text-emerald-600",
+              label: "GOOD",
+            }
+          : {
+              bgGradient: "from-blue-500 to-indigo-600",
+              textColor: "text-blue-600",
+              label: "CHILLY",
+            };
 
   return (
     <main className="min-h-screen bg-slate-50 overflow-x-hidden pt-8 pl-8 pr-8 sm:pt-4 sm:pl-16 sm:pr-16">

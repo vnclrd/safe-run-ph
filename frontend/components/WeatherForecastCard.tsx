@@ -69,6 +69,8 @@ export default function WeatherForecastCard({
         return "bg-amber-950/80 border-amber-500/40";
       case "GOOD":
         return "bg-emerald-950/80 border-emerald-500/40";
+      case "CHILLY":
+        return "bg-blue-950/80 border-blue-500/40";
       default:
         return "bg-black/20 border-white/10";
     }
@@ -82,6 +84,8 @@ export default function WeatherForecastCard({
         return "bg-black/40 border-amber-900/20";
       case "GOOD":
         return "bg-black/40 border-emerald-900/20";
+      case "CHILLY":
+        return "bg-black/40 border-blue-900/20";
       default:
         return "bg-black/40 border-white/5";
     }
