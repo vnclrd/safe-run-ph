@@ -14,6 +14,7 @@ export default function Home() {
   const [recommendation, setRecommendation] = useState<any>(null);
   const [weatherLoading, setWeatherLoading] = useState(true);
   const [greeting, setGreeting] = useState("Good morning,");
+  const [isBranding, setIsBranding] = useState(false);
   const [timeOfDay, setTimeOfDay] =
     useState<ReturnType<typeof getTimeOfDay>>("umaga");
   const [isMounted, setIsMounted] = useState(false);
@@ -46,6 +47,17 @@ export default function Home() {
 
     // Keep timeOfDay in sync as time passes
     const clock = setInterval(updateTimeBasedState, 1000);
+
+    // ⚡ Timing Sequence for Hero Section
+    // ⚡ Start the "fade swap" at 1 second
+    const brandingTimer = setTimeout(() => {
+      setIsBranding(true);
+    }, 1000);
+
+    // ⚡ Start the "slide up" at 2 seconds
+    const heroTimer = setTimeout(() => {
+      setShowHero(false);
+    }, 2000);
 
     async function init() {
       const getCoords = (): Promise<{ lat: number; lon: number } | null> => {
@@ -200,7 +212,11 @@ export default function Home() {
     }
     init();
 
-    return () => clearInterval(clock);
+    return () => {
+      clearInterval(clock);
+      clearTimeout(brandingTimer);
+      clearTimeout(heroTimer);
+    };
   }, []);
 
   // DYNAMIC GLOBAL STATUS (Drives the Hero and Badge Colors)
@@ -272,8 +288,26 @@ export default function Home() {
             ${status.textColor}
           `}
         >
-          {greeting}
-          <br className="lg:hidden" /> Runner!
+          <div className="relative h-[2.5rem] flex items-center justify-center">
+            {/* Greeting */}
+            <span
+              className={`absolute transition-opacity duration-300 ease-in-out text-center ${
+                isBranding ? "opacity-0" : "opacity-100"
+              }`}
+            >
+              {greeting}
+              <br className="lg:hidden" /> Runner!
+            </span>
+
+            {/* Branding */}
+            <span
+              className={`absolute transition-opacity duration-300 ease-in-out text-center ${
+                isBranding ? "opacity-100" : "opacity-0"
+              }`}
+            >
+              Safe-Run PH
+            </span>
+          </div>
         </h2>
       </div>
 
