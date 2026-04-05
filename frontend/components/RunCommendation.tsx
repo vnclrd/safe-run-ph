@@ -1,9 +1,26 @@
 "use client";
 
+type TimeOfDay = "umaga" | "hapon" | "gabi" | "madaling araw";
+
+export function getTimeOfDay(hour: number): TimeOfDay {
+  if (hour >= 6 && hour < 12) return "umaga";
+  if (hour >= 12 && hour < 18) return "hapon";
+  if (hour >= 18 && hour < 24) return "gabi";
+  return "madaling araw";
+}
+
+function applyTimeOfDay(message: string, timeOfDay: TimeOfDay): string {
+  // Replace "today" and "ngayong araw" with the time-specific phrase
+  return message
+    .replace(/\btoday\b/g, `ngayong ${timeOfDay}`)
+    .replace(/ngayong araw/g, `ngayong ${timeOfDay}`);
+}
+
 export default function RunCommendation({
   recommendation,
   loading,
   status,
+  timeOfDay,
 }: any) {
   const getMessageSize = (text: string) => {
     const length = text?.length || 0;
@@ -12,6 +29,11 @@ export default function RunCommendation({
     if (length < 180) return "text-base sm:text-lg";
     return "text-sm sm:text-base";
   };
+
+  const processedMessage =
+    recommendation?.message && timeOfDay
+      ? applyTimeOfDay(recommendation.message, timeOfDay)
+      : recommendation?.message;
 
   if (loading) {
     return (
@@ -57,12 +79,12 @@ export default function RunCommendation({
 
           <p
             className={`
-              ${getMessageSize(recommendation?.message)} 
+              ${getMessageSize(processedMessage)} 
               font-bold text-slate-600 leading-tight sm:leading-relaxed text-center sm:text-left
               line-clamp-4
             `}
           >
-            {recommendation?.message}
+            {processedMessage}
           </p>
         </div>
       </div>

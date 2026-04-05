@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Thermometer, MapPin, Clock2 } from "lucide-react";
+import { getTimeOfDay } from "./RunCommendation";
 
 interface TemperatureBadgeProps {
   weather: {
@@ -10,18 +11,18 @@ interface TemperatureBadgeProps {
   } | null;
   loading: boolean;
   status: { label: string; bgGradient: string; textColor: string };
+  onTimeOfDayChange?: (timeOfDay: ReturnType<typeof getTimeOfDay>) => void;
 }
 
 export default function TemperatureBadge({
   weather,
   loading,
   status,
+  onTimeOfDayChange,
 }: TemperatureBadgeProps) {
-  // State to hold the live time
   const [time, setTime] = useState<string | null>(null);
 
   useEffect(() => {
-    // Helper to format time as 0:00:00 AM/PM
     const formatTime = () => {
       return new Date().toLocaleTimeString("en-US", {
         hour: "numeric",
@@ -31,17 +32,21 @@ export default function TemperatureBadge({
       });
     };
 
+    const updateTime = () => {
+      const now = new Date();
+      setTime(formatTime());
+      onTimeOfDayChange?.(getTimeOfDay(now.getHours()));
+    };
+
     // Set initial time immediately on mount
-    setTime(formatTime());
+    updateTime();
 
     // Update time every second
-    const timer = setInterval(() => {
-      setTime(formatTime());
-    }, 1000);
+    const timer = setInterval(updateTime, 1000);
 
     // Cleanup interval on component unmount
     return () => clearInterval(timer);
-  }, []);
+  }, [onTimeOfDayChange]);
 
   if (loading) {
     return (

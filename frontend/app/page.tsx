@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { httpsCallable } from "firebase/functions";
 import { functions } from "@/lib/firebase";
 import TemperatureBadge from "@/components/TemperatureBadge";
-import RunCommendation from "@/components/RunCommendation";
+import RunCommendation, { getTimeOfDay } from "@/components/RunCommendation";
 import MetricGrid from "@/components/MetricGrid";
 import WeatherForecastCard from "@/components/WeatherForecastCard";
 import recommendations from "@/lib/recommendations.json";
@@ -14,6 +14,8 @@ export default function Home() {
   const [recommendation, setRecommendation] = useState<any>(null);
   const [weatherLoading, setWeatherLoading] = useState(true);
   const [greeting, setGreeting] = useState("Good morning,");
+  const [timeOfDay, setTimeOfDay] =
+    useState<ReturnType<typeof getTimeOfDay>>("umaga");
   const [isMounted, setIsMounted] = useState(false);
   const [showHero, setShowHero] = useState(true);
   const [humidityColor, setHumidityColor] = useState("text-slate-400");
@@ -29,15 +31,21 @@ export default function Home() {
   useEffect(() => {
     setIsMounted(true);
 
-    const updateGreeting = () => {
+    const updateTimeBasedState = () => {
       const hour = new Date().getHours();
+
       if (hour >= 5 && hour < 12) setGreeting("Good morning,");
       else if (hour >= 12 && hour < 18) setGreeting("Good afternoon,");
       else if (hour >= 18 && hour <= 23) setGreeting("Good evening,");
       else setGreeting("Good morning,");
+
+      setTimeOfDay(getTimeOfDay(hour));
     };
 
-    updateGreeting();
+    updateTimeBasedState();
+
+    // Keep timeOfDay in sync as time passes
+    const clock = setInterval(updateTimeBasedState, 1000);
 
     async function init() {
       const getCoords = (): Promise<{ lat: number; lon: number } | null> => {
@@ -46,7 +54,7 @@ export default function Home() {
           navigator.geolocation.getCurrentPosition(
             (pos) =>
               resolve({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
-            () => resolve(null), // Default if denied
+            () => resolve(null),
             { timeout: 5000 },
           );
         });
@@ -191,6 +199,8 @@ export default function Home() {
       }
     }
     init();
+
+    return () => clearInterval(clock);
   }, []);
 
   // DYNAMIC GLOBAL STATUS (Drives the Hero and Badge Colors)
@@ -213,7 +223,6 @@ export default function Home() {
     const extremeUV = uv >= 11 ? 1 : 0;
     const extremeHumid = hum >= 85 ? 1 : 0;
 
-    // Calculate total extreme metrics
     const extremeCount =
       extremeHeat + extremePrecip + extremeWind + extremeUV + extremeHumid;
 
@@ -224,21 +233,18 @@ export default function Home() {
         label: "DANGER",
       };
     } else if (extremeCount >= 1) {
-      // 1 or 2 extreme metrics
       status = {
         bgGradient: "from-amber-400 to-orange-500",
         textColor: "text-orange-500",
         label: "CAUTION",
       };
     } else if (temp < 26) {
-      // 0 extreme metrics, check if chilly
       status = {
         bgGradient: "from-blue-500 to-indigo-600",
         textColor: "text-blue-600",
         label: "CHILLY",
       };
     } else {
-      // 0 extreme metrics, normal temp
       status = {
         bgGradient: "from-emerald-500 to-teal-600",
         textColor: "text-emerald-600",
@@ -255,11 +261,11 @@ export default function Home() {
           transition-all duration-1000 ease-in-out
           ${showHero ? "h-[90dvh] mb-4" : "h-[15dvh] sm:h-[25dvh] md:h-[10dvh] md:mt-4 mb-4 md:mb-8"}
         `}
-      >        
+      >
         <h2
           className={`
             ${showHero ? "text-3xl sm:text-5xl md:text-6xl lg:text-6xl" : "text-3xl sm:text-2xl md:text-4xl"}
-            font-black italic uppercase leading-[0.9] sm:leading-none text-center tracking-tighter 
+            font-black italic leading-[0.9] sm:leading-none text-center tracking-tighter 
             lg:whitespace-nowrap
             transition-all duration-1000 ease-in-out transform
             ${isMounted ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-24"}
@@ -282,10 +288,11 @@ export default function Home() {
             recommendation={recommendation}
             loading={weatherLoading}
             status={status}
+            timeOfDay={timeOfDay}
           />
         </div>
 
-        <MetricGrid 
+        <MetricGrid
           weather={weather}
           loading={weatherLoading}
           humidity={{ desc: humidityDesc, color: humidityColor }}
