@@ -4,6 +4,12 @@ const db = getFirestore();
 const NCR_LAT = 14.5995;
 const NCR_LON = 120.9842;
 
+function getCardinalDirection(angle: number): string {
+  const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+  const index = Math.round(((angle %= 360) < 0 ? angle + 360 : angle) / 45) % 8;
+  return directions[index];
+}
+
 async function getCityName(lat: number, lon: number): Promise<string> {
   try {
     const res = await fetch(
@@ -54,7 +60,7 @@ export async function fetchAndCacheWeather(lat?: number, lon?: number) {
     return snap.data();
   }
 
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,precipitation,wind_speed_10m,uv_index&hourly=temperature_2m,weather_code,precipitation_probability&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FManila&forecast_days=1`;
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,precipitation,wind_speed_10m,wind_direction_10m,uv_index&hourly=temperature_2m,weather_code,precipitation_probability&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FManila&forecast_days=1`;
 
   const res = await fetch(url);
   const data = (await res.json()) as any;
@@ -66,10 +72,12 @@ export async function fetchAndCacheWeather(lat?: number, lon?: number) {
     conditionCode: data.current.weather_code,
     precip: data.current.precipitation,
     windSpeed: Math.round(data.current.wind_speed_10m),
+    windDirectionDeg: Math.round(data.current.wind_direction_10m),
+    windDirection: getCardinalDirection(data.current.wind_direction_10m),
     uvIndex: data.current.uv_index,
     todayHi: Math.round(data.daily.temperature_2m_max[0]),
     todayLo: Math.round(data.daily.temperature_2m_min[0]),
-    locationLabel: rawCity, // ⚡ Pass the detected city name to the UI
+    locationLabel: rawCity,
     hourly: data.hourly.time.slice(0, 24).map((time: string, i: number) => ({
       time: new Date(time).getHours(),
       temp: Math.round(data.hourly.temperature_2m[i]),

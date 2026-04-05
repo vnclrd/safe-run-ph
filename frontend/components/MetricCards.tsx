@@ -110,6 +110,7 @@ export default function MetricGrid({
         label="Wind Speed"
         icon={Wind}
         value={loading ? "---" : `${weather?.windSpeed || 0}km/h`}
+        subtitle={loading ? "" : `${weather?.windDirectionDeg}° ${weather?.windDirection}`}
         description={loading ? "" : wind.desc}
         colorClass={loading ? "text-slate-400" : wind.color}
       />
