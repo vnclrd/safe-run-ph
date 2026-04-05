@@ -10,6 +10,7 @@ interface MiniMetricCardProps {
   colorClass: string;
   icon: React.ElementType;
   progress?: number;
+  compact?: boolean;
 }
 
 function MiniMetricCard({
@@ -20,9 +21,14 @@ function MiniMetricCard({
   colorClass,
   icon: Icon,
   progress,
+  compact,
 }: MiniMetricCardProps) {
   return (
-    <div className="w-full h-full gap-2 flex flex-col justify-center items-center p-4 rounded-[1.5rem] bg-white border border-slate-100 shadow-sm transition-all duration-700">
+    <div
+      className={`flex flex-col justify-center items-center p-4 rounded-[1.5rem] bg-white border border-slate-100 shadow-sm transition-all duration-700 ${
+        compact ? "gap-1" : "gap-2"
+      }`}
+    >
       <div className="flex items-center gap-1.5 text-slate-400 mb-1">
         {Icon && <Icon size={12} strokeWidth={3} />}
         <p className="text-[10px] font-black uppercase tracking-widest">
@@ -105,12 +111,17 @@ export default function MetricGrid({
         description={loading ? "" : currentUv.desc}
         colorClass={loading ? "text-slate-400" : currentUv.color}
         progress={loading ? 0 : currentUv.percent}
+        compact
       />
       <MiniMetricCard
         label="Wind Speed"
         icon={Wind}
         value={loading ? "---" : `${weather?.windSpeed || 0}km/h`}
-        subtitle={loading ? "" : `${weather?.windDirectionDeg}° ${weather?.windDirection}`}
+        subtitle={
+          loading
+            ? ""
+            : `${weather?.windDirectionDeg}° ${weather?.windDirection}`
+        }
         description={loading ? "" : wind.desc}
         colorClass={loading ? "text-slate-400" : wind.color}
       />
