@@ -8,6 +8,7 @@ import RunCommendationCard, {
 } from "@/components/RunCommendationCard";
 import MetricCards from "@/components/MetricCards";
 import TemperatureForecastCard from "@/components/TemperatureForecastCard";
+import GraphCard from "@/components/GraphCard";
 import dynamic from "next/dynamic";
 import recommendations from "@/lib/recommendations.json";
 import metricMsgs from "@/lib/metrics.json";
@@ -93,6 +94,7 @@ export default function Home() {
   const analysis = useMemo(() => {
     const defaultStatus = {
       bgGradient: "bg-slate-200",
+      bgColor: "bg-slate-200",
       textColor: "text-slate-400",
       label: "LOADING",
     };
@@ -117,7 +119,7 @@ export default function Home() {
       (effectiveTemp >= 42 ? 1 : 0) +
       (precip >= 7.6 ? 1 : 0) +
       (wind >= 39 ? 1 : 0) +
-      (currentUv >= 11 ? 1 : 0);
+      (currentUv >= 8 ? 1 : 0);
 
     const isRainy = precip > 0;
     const isWindy = wind >= 29;
@@ -136,18 +138,45 @@ export default function Home() {
     let category: "CHILLY" | "GOOD" | "CAUTION" | "DANGER" = "GOOD";
     let status = defaultStatus;
 
+    // DANGER: Extreme single metrics or 3+ cautions
     if (extremeCount >= 1 || cautionCount >= 3) {
       category = "DANGER";
-      status = { bgGradient: "from-red-600 to-rose-700", textColor: "text-red-600", label: "DANGER" };
-    } else if (cautionCount >= 1) {
-      category = "CAUTION";
-      status = { bgGradient: "from-amber-400 to-orange-500", textColor: "text-orange-500", label: "CAUTION" };
-    } else if (effectiveTemp < 26) {
+      status = { 
+        bgGradient: "from-red-600 to-rose-700", 
+        bgColor: "bg-rose-600/80", 
+        textColor: "text-red-600", 
+        label: "DANGER" 
+      };
+    } 
+    // CHILLY: Prioritize temp if it's cool, even if it's humid
+    else if (effectiveTemp < 26) {
       category = "CHILLY";
-      status = { bgGradient: "from-blue-500 to-indigo-600", textColor: "text-blue-600", label: "CHILLY" };
-    } else {
+      status = { 
+        bgGradient: "from-blue-500 to-indigo-600", 
+        bgColor: "bg-blue-600/60", 
+        textColor: "text-blue-600", 
+        label: "CHILLY" 
+      };
+    } 
+    // CAUTION: Only flag caution for moderate temps with environmental hurdles
+    else if (cautionCount >= 1) {
+      category = "CAUTION";
+      status = { 
+        bgGradient: "from-amber-400 to-orange-500", 
+        bgColor: "bg-orange-600/70", 
+        textColor: "text-orange-500", 
+        label: "CAUTION" 
+      };
+    } 
+    // GOOD: Default ideal running weather
+    else {
       category = "GOOD";
-      status = { bgGradient: "from-emerald-500 to-teal-600", textColor: "text-emerald-600", label: "GOOD" };
+      status = { 
+        bgGradient: "from-emerald-500 to-teal-600", 
+        bgColor: "bg-emerald-600/60", 
+        textColor: "text-emerald-600", 
+        label: "GOOD" 
+      };
     }
 
     // -- Recommendation Sub-Category Routing --
@@ -274,6 +303,12 @@ export default function Home() {
             status={status}
           />
         </div>
+
+        <GraphCard
+          weather={weather}
+          loading={weatherLoading}
+          status={status}
+        />
 
         <div className="lg:col-span-2 lg:col-start-2">
           <HeatMapCard

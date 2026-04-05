@@ -64,15 +64,15 @@ export default function WeatherForecastCard({
   const getAccentBg = () => {
     switch (status.label) {
       case "DANGER":
-        return "bg-red-950/80 border-red-500/40";
+        return "bg-red-700";
       case "CAUTION":
-        return "bg-amber-950/80 border-amber-500/40";
+        return "bg-amber-700";
       case "GOOD":
-        return "bg-emerald-950/80 border-emerald-500/40";
+        return "bg-emerald-700";
       case "CHILLY":
-        return "bg-blue-950/80 border-blue-500/40";
+        return "bg-blue-700";
       default:
-        return "bg-black/20 border-white/10";
+        return "bg-black/20";
     }
   };
 
