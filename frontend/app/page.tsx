@@ -30,6 +30,7 @@ export default function Home() {
   const [uvDesc, setUvDesc] = useState("");
   const [windDesc, setWindDesc] = useState("");
   const [uvPercent, setUvPercent] = useState(0);
+  const [uvStatus, setUvStatus] = useState("");
 
   useEffect(() => {
     setIsMounted(true);
@@ -47,16 +48,12 @@ export default function Home() {
 
     updateTimeBasedState();
 
-    // Keep timeOfDay in sync as time passes
     const clock = setInterval(updateTimeBasedState, 1000);
 
-    // ⚡ Timing Sequence for Hero Section
-    // ⚡ Start the "fade swap" at 1 second
     const brandingTimer = setTimeout(() => {
       setIsBranding(true);
     }, 1000);
 
-    // ⚡ Start the "slide up" at 2 seconds
     const heroTimer = setTimeout(() => {
       setShowHero(false);
     }, 2000);
@@ -88,6 +85,11 @@ export default function Home() {
         setWeather(weatherData);
         setWeatherLoading(false);
 
+        const getRand = (cat: string, lvl: string) => {
+          const pool = (metricMsgs as any)[cat][lvl];
+          return pool[Math.floor(Math.random() * pool.length)];
+        };
+
         setTimeout(() => {
           setShowHero(false);
         }, 1000);
@@ -95,34 +97,78 @@ export default function Home() {
         const temp = weatherData.temp || weatherData.heatIndex;
         const precip = weatherData.precip || 0;
         const wind = weatherData.windSpeed || 0;
-        const uv = weatherData.uvIndex || 0;
+        const currentUv = weatherData.uvIndex || 0;
         const hum = weatherData.humidity || 0;
 
         // 5-METRIC VOTING ESCALATION LOGIC
         const extremeHeat = temp >= 42 ? 1 : 0;
         const extremePrecip = precip >= 7.6 ? 1 : 0;
         const extremeWind = wind >= 39 ? 1 : 0;
-        const extremeUV = uv >= 11 ? 1 : 0;
+        const extremeUV = currentUv >= 11 ? 1 : 0;
         const extremeHumid = hum >= 85 ? 1 : 0;
 
         const extremeCount =
           extremeHeat + extremePrecip + extremeWind + extremeUV + extremeHumid;
 
-        let category: "CHILLY" | "GOOD" | "CAUTION" | "DANGER" = "GOOD";
-
-        if (extremeCount >= 3) {
-          category = "DANGER";
-        } else if (extremeCount >= 1) {
-          category = "CAUTION";
+        // UV INDEX INTELLIGENT STATUS
+        let uvLabel = "Low";
+        let uvKey = "low";
+        if (currentUv >= 11) {
+          uvLabel = "Extreme";
+          uvKey = "extreme";
+        } else if (currentUv >= 8) {
+          uvLabel = "Very High";
+          uvKey = "extreme";
+        } else if (currentUv >= 6) {
+          uvLabel = "High";
+          uvKey = "high";
+        } else if (currentUv >= 3) {
+          uvLabel = "Moderate";
+          uvKey = "moderate";
         } else {
-          category = temp < 26 ? "CHILLY" : "GOOD";
+          uvLabel = "Low";
+          uvKey = "low";
         }
+
+        setUvStatus(uvLabel); // ⚡ Update status text
+        setUvDesc(getRand("uvIndex", uvKey));
+        setUvColor(
+          currentUv >= 11
+            ? "text-rose-500"
+            : currentUv >= 8
+              ? "text-orange-500"
+              : currentUv >= 3
+                ? "text-amber-500"
+                : "text-emerald-500",
+        );
+        setUvPercent(Math.min((currentUv / 11) * 100, 100));
 
         // ADVANCED MULTI-METRIC SUB-CATEGORY EVALUATION
         const isRainy = precip > 0;
         const isWindy = wind >= 29;
-        const isSunny = uv >= 6;
+        const isSunny = currentUv >= 6;
         const isHumid = hum > 65;
+        const isWarm = temp >= 32;
+
+        // CAUTION-LEVEL VOTING
+        const cautionCount =
+          (isRainy ? 1 : 0) +
+          (isWindy ? 1 : 0) +
+          (isSunny ? 1 : 0) +
+          (isHumid ? 1 : 0) +
+          (isWarm ? 1 : 0);
+
+        let category: "CHILLY" | "GOOD" | "CAUTION" | "DANGER" = "GOOD";
+
+        if (extremeCount >= 1) {
+          category = "DANGER";
+        } else if (cautionCount >= 3) {
+          category = "DANGER";
+        } else if (cautionCount >= 1) {
+          category = "CAUTION";
+        } else {
+          category = temp < 26 ? "CHILLY" : "GOOD";
+        }
 
         let subCategory = "optimal";
 
@@ -146,13 +192,7 @@ export default function Home() {
 
         setRecommendation(randomAdvice);
 
-        const getRand = (cat: string, lvl: string) => {
-          const pool = (metricMsgs as any)[cat][lvl];
-          return pool[Math.floor(Math.random() * pool.length)];
-        };
-
         // METRIC COLOR & DESCRIPTION LOGIC
-
         // Humidity
         const hLvl = hum < 30 ? "low" : hum <= 60 ? "optimal" : "high";
         setHumidityDesc(getRand("humidity", hLvl));
@@ -179,19 +219,25 @@ export default function Home() {
 
         // UV Index
         const uvLvl =
-          uv <= 2 ? "low" : uv <= 5 ? "moderate" : uv <= 7 ? "high" : "extreme";
+          currentUv <= 2
+            ? "low"
+            : currentUv <= 5
+              ? "moderate"
+              : currentUv <= 7
+                ? "high"
+                : "extreme";
         setUvDesc(getRand("uvIndex", uvLvl));
         setUvColor(
-          uv >= 11
+          currentUv >= 11
             ? "text-rose-500"
-            : uv >= 8
+            : currentUv >= 8
               ? "text-orange-500"
-              : uv >= 3
+              : currentUv >= 3
                 ? "text-amber-500"
                 : "text-emerald-500",
         );
 
-        const calculatedPercent = Math.min((uv / 11) * 100, 100);
+        const calculatedPercent = Math.min((currentUv / 11) * 100, 100);
         setUvPercent(calculatedPercent);
 
         // Wind Speed
@@ -244,13 +290,20 @@ export default function Home() {
     const extremeCount =
       extremeHeat + extremePrecip + extremeWind + extremeUV + extremeHumid;
 
-    if (extremeCount >= 3) {
+    const cautionCount =
+      (precip > 0 ? 1 : 0) +
+      (wind >= 29 ? 1 : 0) +
+      (uv >= 6 ? 1 : 0) +
+      (hum > 65 ? 1 : 0) +
+      (temp >= 32 ? 1 : 0);
+
+    if (extremeCount >= 1 || cautionCount >= 3) {
       status = {
         bgGradient: "from-red-600 to-rose-700",
         textColor: "text-red-600",
         label: "DANGER",
       };
-    } else if (extremeCount >= 1) {
+    } else if (cautionCount >= 1) {
       status = {
         bgGradient: "from-amber-400 to-orange-500",
         textColor: "text-orange-500",
@@ -334,7 +387,12 @@ export default function Home() {
           loading={weatherLoading}
           humidity={{ desc: humidityDesc, color: humidityColor }}
           precip={{ desc: precipDesc, color: precipColor }}
-          uv={{ desc: uvDesc, color: uvColor, percent: uvPercent }}
+          currentUv={{
+            desc: uvDesc,
+            color: uvColor,
+            percent: uvPercent,
+            status: uvStatus,
+          }}
           wind={{ desc: windDesc, color: windColor }}
         />
 

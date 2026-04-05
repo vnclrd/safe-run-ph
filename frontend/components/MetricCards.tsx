@@ -5,6 +5,7 @@ import { Droplets, CloudRain, Sun, Wind } from "lucide-react";
 interface MiniMetricCardProps {
   label: string;
   value: string | number;
+  subtitle?: string;
   description: string;
   colorClass: string;
   icon: React.ElementType;
@@ -14,6 +15,7 @@ interface MiniMetricCardProps {
 function MiniMetricCard({
   label,
   value,
+  subtitle,
   description,
   colorClass,
   icon: Icon,
@@ -28,17 +30,29 @@ function MiniMetricCard({
         </p>
       </div>
 
-      <p
-        className={`text-3xl sm:text-2xl font-black italic ${colorClass} leading-none`}
-      >
-        {value}
-      </p>
+      <div className="flex flex-col items-center leading-none">
+        <p className={`text-3xl sm:text-2xl font-black italic ${colorClass}`}>
+          {value}
+        </p>
+        {subtitle && (
+          <p
+            className={`text-[10px] font-black uppercase tracking-wider ${colorClass} opacity-80 mt-1`}
+          >
+            {subtitle}
+          </p>
+        )}
+      </div>
 
+      {/* Render progress bar if a progress value is provided */}
       {progress !== undefined && (
-        <div className="w-full h-1.5 bg-slate-100 rounded-full mt-2 overflow-hidden border border-slate-50">
+        <div className="w-full h-1.5 min-h-[6px] bg-slate-100 rounded-full mt-2 overflow-hidden border border-slate-50 flex">
           <div
-            className="h-full bg-gradient-to-r from-emerald-400 via-amber-400 to-rose-500 transition-all duration-1000 ease-out rounded-full"
-            style={{ width: `${progress}%` }}
+            className="h-full rounded-full transition-all duration-1000 ease-out"
+            style={{
+              width: `${Math.max(0, Math.min(progress, 100))}%`,
+              backgroundImage:
+                "linear-gradient(to right, #34d399, #fbbf24, #f43f5e)",
+            }}
           />
         </div>
       )}
@@ -55,7 +69,7 @@ interface MetricGridProps {
   loading: boolean;
   humidity: { desc: string; color: string };
   precip: { desc: string; color: string };
-  uv: { desc: string; color: string; percent: number };
+  currentUv: { desc: string; color: string; percent: number; status: string };
   wind: { desc: string; color: string };
 }
 
@@ -64,11 +78,11 @@ export default function MetricGrid({
   loading,
   humidity,
   precip,
-  uv,
+  currentUv,
   wind,
 }: MetricGridProps) {
   return (
-    <div className="grid grid-cols-2 grid-rows-2 gap-4 h-75">
+    <div className="grid grid-cols-2 grid-rows-2 gap-4">
       <MiniMetricCard
         label="Humidity"
         icon={CloudRain}
@@ -87,9 +101,10 @@ export default function MetricGrid({
         label="UV Index"
         icon={Sun}
         value={loading ? "---" : weather?.uvIndex || 0}
-        description={loading ? "" : uv.desc}
-        colorClass={loading ? "text-slate-400" : uv.color}
-        progress={loading ? 0 : uv.percent}
+        subtitle={loading ? "" : currentUv.status}
+        description={loading ? "" : currentUv.desc}
+        colorClass={loading ? "text-slate-400" : currentUv.color}
+        progress={loading ? 0 : currentUv.percent}
       />
       <MiniMetricCard
         label="Wind Speed"
