@@ -25,7 +25,7 @@ export default function Home() {
   const [timeOfDay, setTimeOfDay] = useState<ReturnType<typeof getTimeOfDay>>("umaga");
 
   // Heat Map
-  const HeatMap = dynamic(() => import("@/components/HeatMap"), { 
+  const HeatMap = dynamic(() => import("@/components/HeatMapCard"), { 
     ssr: false,
     loading: () => <div className="w-full h-[22rem] rounded-[2rem] bg-white animate-pulse" />
   });
