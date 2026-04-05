@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { httpsCallable } from "firebase/functions";
 import { functions } from "@/lib/firebase";
 import TemperatureCard from "@/components/TemperatureCard";
@@ -12,253 +12,68 @@ import recommendations from "@/lib/recommendations.json";
 import metricMsgs from "@/lib/metrics.json";
 
 export default function Home() {
+  // Core Data & UI States
   const [weather, setWeather] = useState<any>(null);
-  const [recommendation, setRecommendation] = useState<any>(null);
   const [weatherLoading, setWeatherLoading] = useState(true);
-  const [greeting, setGreeting] = useState("Good morning,");
-  const [isBranding, setIsBranding] = useState(false);
-  const [timeOfDay, setTimeOfDay] =
-    useState<ReturnType<typeof getTimeOfDay>>("umaga");
   const [isMounted, setIsMounted] = useState(false);
   const [showHero, setShowHero] = useState(true);
-  const [humidityColor, setHumidityColor] = useState("text-slate-400");
-  const [precipColor, setPrecipColor] = useState("text-slate-400");
-  const [uvColor, setUvColor] = useState("text-slate-400");
-  const [windColor, setWindColor] = useState("text-slate-400");
-  const [humidityDesc, setHumidityDesc] = useState("");
-  const [precipDesc, setPrecipDesc] = useState("");
-  const [uvDesc, setUvDesc] = useState("");
-  const [windDesc, setWindDesc] = useState("");
-  const [uvPercent, setUvPercent] = useState(0);
-  const [uvStatus, setUvStatus] = useState("");
+  const [isBranding, setIsBranding] = useState(false);
+  
+  // Time-based States
+  const [greeting, setGreeting] = useState("Good morning,");
+  const [timeOfDay, setTimeOfDay] = useState<ReturnType<typeof getTimeOfDay>>("umaga");
 
+  // 1. SIDE EFFECTS: Timers and Data Fetching
   useEffect(() => {
     setIsMounted(true);
 
     const updateTimeBasedState = () => {
       const hour = new Date().getHours();
-
       if (hour >= 5 && hour < 12) setGreeting("Good morning,");
       else if (hour >= 12 && hour < 18) setGreeting("Good afternoon,");
       else if (hour >= 18 && hour <= 23) setGreeting("Good evening,");
       else setGreeting("Good morning,");
-
       setTimeOfDay(getTimeOfDay(hour));
     };
 
     updateTimeBasedState();
-
     const clock = setInterval(updateTimeBasedState, 1000);
 
-    const brandingTimer = setTimeout(() => {
-      setIsBranding(true);
-    }, 1000);
+    const brandingTimer = setTimeout(() => setIsBranding(true), 1000);
+    
+    // Fallback hero timer in case fetch takes too long
+    const heroTimer = setTimeout(() => setShowHero(false), 2000);
 
-    const heroTimer = setTimeout(() => {
-      setShowHero(false);
-    }, 2000);
-
-    async function init() {
+    async function fetchWeather() {
       const getCoords = (): Promise<{ lat: number; lon: number } | null> => {
         return new Promise((resolve) => {
           if (!navigator.geolocation) return resolve(null);
           navigator.geolocation.getCurrentPosition(
-            (pos) =>
-              resolve({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
+            (pos) => resolve({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
             () => resolve(null),
-            { timeout: 5000 },
+            { timeout: 5000 }
           );
         });
       };
 
       try {
         const coords = await getCoords();
-        const res = (await httpsCallable(
-          functions,
-          "getLiveWeather",
-        )({
+        const res = (await httpsCallable(functions, "getLiveWeather")({
           lat: coords?.lat,
           lon: coords?.lon,
         })) as any;
 
-        const weatherData = res.data;
-        setWeather(weatherData);
+        setWeather(res.data);
         setWeatherLoading(false);
-
-        const getRand = (cat: string, lvl: string) => {
-          const pool = (metricMsgs as any)[cat][lvl];
-          return pool[Math.floor(Math.random() * pool.length)];
-        };
-
-        setTimeout(() => {
-          setShowHero(false);
-        }, 1000);
-
-        const temp = weatherData.temp || weatherData.heatIndex;
-        const precip = weatherData.precip || 0;
-        const wind = weatherData.windSpeed || 0;
-        const currentUv = weatherData.uvIndex || 0;
-        const hum = weatherData.humidity || 0;
-
-        // 5-METRIC VOTING ESCALATION LOGIC
-        const extremeHeat = temp >= 42 ? 1 : 0;
-        const extremePrecip = precip >= 7.6 ? 1 : 0;
-        const extremeWind = wind >= 39 ? 1 : 0;
-        const extremeUV = currentUv >= 11 ? 1 : 0;
-        const extremeHumid = hum >= 85 ? 1 : 0;
-
-        const extremeCount =
-          extremeHeat + extremePrecip + extremeWind + extremeUV + extremeHumid;
-
-        // UV INDEX INTELLIGENT STATUS
-        let uvLabel = "Low";
-        let uvKey = "low";
-        if (currentUv >= 11) {
-          uvLabel = "Extreme";
-          uvKey = "extreme";
-        } else if (currentUv >= 8) {
-          uvLabel = "Very High";
-          uvKey = "extreme";
-        } else if (currentUv >= 6) {
-          uvLabel = "High";
-          uvKey = "high";
-        } else if (currentUv >= 3) {
-          uvLabel = "Moderate";
-          uvKey = "moderate";
-        } else {
-          uvLabel = "Low";
-          uvKey = "low";
-        }
-
-        setUvStatus(uvLabel); // ⚡ Update status text
-        setUvDesc(getRand("uvIndex", uvKey));
-        setUvColor(
-          currentUv >= 11
-            ? "text-rose-500"
-            : currentUv >= 8
-              ? "text-orange-500"
-              : currentUv >= 3
-                ? "text-amber-500"
-                : "text-emerald-500",
-        );
-        setUvPercent(Math.min((currentUv / 11) * 100, 100));
-
-        // ADVANCED MULTI-METRIC SUB-CATEGORY EVALUATION
-        const isRainy = precip > 0;
-        const isWindy = wind >= 29;
-        const isSunny = currentUv >= 6;
-        const isHumid = hum > 65;
-        const isWarm = temp >= 32;
-
-        // CAUTION-LEVEL VOTING
-        const cautionCount =
-          (isRainy ? 1 : 0) +
-          (isWindy ? 1 : 0) +
-          (isSunny ? 1 : 0) +
-          (isHumid ? 1 : 0) +
-          (isWarm ? 1 : 0);
-
-        let category: "CHILLY" | "GOOD" | "CAUTION" | "DANGER" = "GOOD";
-
-        if (extremeCount >= 1) {
-          category = "DANGER";
-        } else if (cautionCount >= 3) {
-          category = "DANGER";
-        } else if (cautionCount >= 1) {
-          category = "CAUTION";
-        } else {
-          category = temp < 26 ? "CHILLY" : "GOOD";
-        }
-
-        let subCategory = "optimal";
-
-        // 1. Extreme Hazard Override
-        if (category === "DANGER") subCategory = "extreme";
-        // 2. Dual-Condition Combos
-        else if (isRainy && isWindy) subCategory = "rainy_windy";
-        else if (isSunny && isHumid) subCategory = "sunny_humid";
-        else if (isSunny && isWindy) subCategory = "sunny_windy";
-        else if (isHumid && isWindy) subCategory = "humid_windy";
-        // 3. Single Conditions
-        else if (isRainy) subCategory = "rainy";
-        else if (isSunny) subCategory = "sunny";
-        else if (isHumid) subCategory = "humid";
-        else if (isWindy) subCategory = "windy";
-
-        const pool =
-          (recommendations as any)[category]?.[subCategory] ||
-          (recommendations as any)[category]?.["optimal"];
-        const randomAdvice = pool[Math.floor(Math.random() * pool.length)];
-
-        setRecommendation(randomAdvice);
-
-        // METRIC COLOR & DESCRIPTION LOGIC
-        // Humidity
-        const hLvl = hum < 30 ? "low" : hum <= 60 ? "optimal" : "high";
-        setHumidityDesc(getRand("humidity", hLvl));
-        setHumidityColor(
-          hum >= 85
-            ? "text-rose-500"
-            : hLvl === "optimal"
-              ? "text-emerald-500"
-              : hLvl === "low"
-                ? "text-blue-500"
-                : "text-amber-500",
-        );
-
-        // Precipitation
-        const pLvl = precip === 0 ? "dry" : precip < 7.6 ? "light" : "heavy";
-        setPrecipDesc(getRand("precipitation", pLvl));
-        setPrecipColor(
-          precip >= 7.6
-            ? "text-rose-500"
-            : pLvl === "dry"
-              ? "text-emerald-500"
-              : "text-amber-500",
-        );
-
-        // UV Index
-        const uvLvl =
-          currentUv <= 2
-            ? "low"
-            : currentUv <= 5
-              ? "moderate"
-              : currentUv <= 7
-                ? "high"
-                : "extreme";
-        setUvDesc(getRand("uvIndex", uvLvl));
-        setUvColor(
-          currentUv >= 11
-            ? "text-rose-500"
-            : currentUv >= 8
-              ? "text-orange-500"
-              : currentUv >= 3
-                ? "text-amber-500"
-                : "text-emerald-500",
-        );
-
-        const calculatedPercent = Math.min((currentUv / 11) * 100, 100);
-        setUvPercent(calculatedPercent);
-
-        // Wind Speed
-        const wLvl = wind < 12 ? "calm" : wind <= 28 ? "breezy" : "windy";
-        setWindDesc(getRand("windSpeed", wLvl));
-        setWindColor(
-          wind >= 39
-            ? "text-rose-500"
-            : wind >= 29
-              ? "text-orange-500"
-              : wind >= 12
-                ? "text-amber-500"
-                : "text-emerald-500",
-        );
+        setTimeout(() => setShowHero(false), 1000); // Hide hero after load
       } catch (err) {
         console.error("Safe-Run Error:", err);
         setWeatherLoading(false);
         setShowHero(false);
       }
     }
-    init();
+    
+    fetchWeather();
 
     return () => {
       clearInterval(clock);
@@ -267,62 +82,116 @@ export default function Home() {
     };
   }, []);
 
-  // DYNAMIC GLOBAL STATUS (Drives the Hero and Badge Colors)
-  let status = {
-    bgGradient: "bg-slate-200",
-    textColor: "text-slate-400",
-    label: "LOADING",
-  };
+  // 2. WEATHER LOGIC ENGINE: Recalculate when weather changes
+  const analysis = useMemo(() => {
+    const defaultStatus = {
+      bgGradient: "bg-slate-200",
+      textColor: "text-slate-400",
+      label: "LOADING",
+    };
 
-  if (weather) {
-    const temp = weather.temp || weather.heatIndex;
+    if (!weather) {
+      return { status: defaultStatus, recommendation: null, metrics: null };
+    }
+
+    const getRand = (cat: string, lvl: string) => {
+      const pool = (metricMsgs as any)[cat]?.[lvl];
+      return pool ? pool[Math.floor(Math.random() * pool.length)] : "";
+    };
+
+    const temp = weather.temp || weather.heatIndex || 0;
     const precip = weather.precip || 0;
     const wind = weather.windSpeed || 0;
-    const uv = weather.uvIndex || 0;
+    const currentUv = weather.uvIndex || 0;
     const hum = weather.humidity || 0;
 
-    const extremeHeat = temp >= 42 ? 1 : 0;
-    const extremePrecip = precip >= 7.6 ? 1 : 0;
-    const extremeWind = wind >= 39 ? 1 : 0;
-    const extremeUV = uv >= 11 ? 1 : 0;
-    const extremeHumid = hum >= 85 ? 1 : 0;
-
+    // -- Voting Escalation Logic --
     const extremeCount =
-      extremeHeat + extremePrecip + extremeWind + extremeUV + extremeHumid;
+      (temp >= 42 ? 1 : 0) +
+      (precip >= 7.6 ? 1 : 0) +
+      (wind >= 39 ? 1 : 0) +
+      (currentUv >= 11 ? 1 : 0) +
+      (hum >= 85 ? 1 : 0);
+
+    const isRainy = precip > 0;
+    const isWindy = wind >= 29;
+    const isSunny = currentUv >= 6;
+    const isHumid = hum > 65;
+    const isWarm = temp >= 32;
 
     const cautionCount =
-      (precip > 0 ? 1 : 0) +
-      (wind >= 29 ? 1 : 0) +
-      (uv >= 6 ? 1 : 0) +
-      (hum > 65 ? 1 : 0) +
-      (temp >= 32 ? 1 : 0);
+      (isRainy ? 1 : 0) +
+      (isWindy ? 1 : 0) +
+      (isSunny ? 1 : 0) +
+      (isHumid ? 1 : 0) +
+      (isWarm ? 1 : 0);
+
+    // -- Global Status & Category Determination --
+    let category: "CHILLY" | "GOOD" | "CAUTION" | "DANGER" = "GOOD";
+    let status = defaultStatus;
 
     if (extremeCount >= 1 || cautionCount >= 3) {
-      status = {
-        bgGradient: "from-red-600 to-rose-700",
-        textColor: "text-red-600",
-        label: "DANGER",
-      };
+      category = "DANGER";
+      status = { bgGradient: "from-red-600 to-rose-700", textColor: "text-red-600", label: "DANGER" };
     } else if (cautionCount >= 1) {
-      status = {
-        bgGradient: "from-amber-400 to-orange-500",
-        textColor: "text-orange-500",
-        label: "CAUTION",
-      };
+      category = "CAUTION";
+      status = { bgGradient: "from-amber-400 to-orange-500", textColor: "text-orange-500", label: "CAUTION" };
     } else if (temp < 26) {
-      status = {
-        bgGradient: "from-blue-500 to-indigo-600",
-        textColor: "text-blue-600",
-        label: "CHILLY",
-      };
+      category = "CHILLY";
+      status = { bgGradient: "from-blue-500 to-indigo-600", textColor: "text-blue-600", label: "CHILLY" };
     } else {
-      status = {
-        bgGradient: "from-emerald-500 to-teal-600",
-        textColor: "text-emerald-600",
-        label: "GOOD",
-      };
+      category = "GOOD";
+      status = { bgGradient: "from-emerald-500 to-teal-600", textColor: "text-emerald-600", label: "GOOD" };
     }
-  }
+
+    // -- Recommendation Sub-Category Routing --
+    let subCategory = "optimal";
+    if (category === "DANGER") subCategory = "extreme";
+    else if (isRainy && isWindy) subCategory = "rainy_windy";
+    else if (isSunny && isHumid) subCategory = "sunny_humid";
+    else if (isSunny && isWindy) subCategory = "sunny_windy";
+    else if (isHumid && isWindy) subCategory = "humid_windy";
+    else if (isRainy) subCategory = "rainy";
+    else if (isSunny) subCategory = "sunny";
+    else if (isHumid) subCategory = "humid";
+    else if (isWindy) subCategory = "windy";
+
+    const recPool =
+      (recommendations as any)[category]?.[subCategory] ||
+      (recommendations as any)[category]?.["optimal"] || [];
+    const randomAdvice = recPool.length > 0 ? recPool[Math.floor(Math.random() * recPool.length)] : "";
+
+    // -- Metric Specific Formatting --
+    // UV
+    const uvLvl = currentUv >= 11 ? "extreme" : currentUv >= 8 ? "extreme" : currentUv >= 6 ? "high" : currentUv >= 3 ? "moderate" : "low";
+    const uvLabel = currentUv >= 11 ? "Extreme" : currentUv >= 8 ? "Very High" : currentUv >= 6 ? "High" : currentUv >= 3 ? "Moderate" : "Low";
+    const uvColor = currentUv >= 11 ? "text-rose-500" : currentUv >= 8 ? "text-orange-500" : currentUv >= 3 ? "text-amber-500" : "text-emerald-500";
+    
+    // Humidity
+    const hLvl = hum < 30 ? "low" : hum <= 60 ? "optimal" : "high";
+    const humColor = hum >= 85 ? "text-rose-500" : hLvl === "optimal" ? "text-emerald-500" : hLvl === "low" ? "text-blue-500" : "text-amber-500";
+
+    // Precipitation
+    const pLvl = precip === 0 ? "dry" : precip < 7.6 ? "light" : "heavy";
+    const precipColor = precip >= 7.6 ? "text-rose-500" : pLvl === "dry" ? "text-emerald-500" : "text-amber-500";
+
+    // Wind
+    const wLvl = wind < 12 ? "calm" : wind <= 28 ? "breezy" : "windy";
+    const windColor = wind >= 39 ? "text-rose-500" : wind >= 29 ? "text-orange-500" : wind >= 12 ? "text-amber-500" : "text-emerald-500";
+
+    return {
+      status,
+      recommendation: randomAdvice,
+      metrics: {
+        uv: { desc: getRand("uvIndex", uvLvl), color: uvColor, percent: Math.min((currentUv / 11) * 100, 100), status: uvLabel },
+        humidity: { desc: getRand("humidity", hLvl), color: humColor },
+        precip: { desc: getRand("precipitation", pLvl), color: precipColor },
+        wind: { desc: getRand("windSpeed", wLvl), color: windColor },
+      },
+    };
+  }, [weather]);
+
+  const { status, recommendation, metrics } = analysis;
 
   return (
     <main className="min-h-screen bg-slate-50 overflow-x-hidden pt-8 pl-8 pr-8 sm:pt-4 sm:pl-16 sm:pr-16">
@@ -373,6 +242,7 @@ export default function Home() {
           loading={weatherLoading}
           status={status}
         />
+        
         <div className="lg:col-span-2">
           <RunCommendationCard
             recommendation={recommendation}
@@ -385,15 +255,10 @@ export default function Home() {
         <MetricCards
           weather={weather}
           loading={weatherLoading}
-          humidity={{ desc: humidityDesc, color: humidityColor }}
-          precip={{ desc: precipDesc, color: precipColor }}
-          currentUv={{
-            desc: uvDesc,
-            color: uvColor,
-            percent: uvPercent,
-            status: uvStatus,
-          }}
-          wind={{ desc: windDesc, color: windColor }}
+          humidity={metrics?.humidity || { desc: "", color: "text-slate-400" }}
+          precip={metrics?.precip || { desc: "", color: "text-slate-400" }}
+          currentUv={metrics?.uv || { desc: "", color: "text-slate-400", percent: 0, status: "" }}
+          wind={metrics?.wind || { desc: "", color: "text-slate-400" }}
         />
 
         <div className="lg:col-span-2">
