@@ -86,10 +86,10 @@ function CityZoomButton({ lat, lon }: { lat: number; lon: number }) {
   return (
     <button
       onClick={handleZoom}
-      className="absolute bottom-4 left-4 z-[400] bg-slate-800 text-white p-3 rounded-full shadow-lg border border-slate-700 hover:bg-slate-700 hover:scale-105 transition-all flex items-center justify-center"
+      className="absolute bottom-4 left-4 z-[400] bg-white text-white p-3 rounded-full shadow-lg hover:bg-slate-200 hover:scale-105 transition-all flex items-center justify-center"
       title="Find Me"
     >
-      <Crosshair size={18} />
+      <Crosshair size={18} className="text-slate-400" />
     </button>
   );
 }
@@ -311,14 +311,14 @@ function Legend() {
   return (
     <div
       className="
-  absolute bottom-4 right-4 z-[400]
-  bg-slate-900/80 backdrop-blur-md border border-slate-700 rounded-xl
-  px-3 py-2 flex flex-col gap-1
+        absolute top-4 right-4 z-[400]
+        bg-white/80 backdrop-blur-md rounded-xl
+        px-3 py-2 flex flex-col gap-1
 
-  max-w-[140px] sm:max-w-none
-  scale-90 sm:scale-100
-  origin-bottom-right
-"
+        max-w-[140px] sm:max-w-none
+        scale-90 sm:scale-100
+        origin-bottom-right
+        "
     >
       <p className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">
         Heat Index
@@ -331,7 +331,7 @@ function Legend() {
       ].map(({ color, label, sub }) => (
         <div key={sub} className="flex items-center gap-2">
           <div className={`w-2.5 h-2.5 rounded-full ${color} flex-shrink-0`} />
-          <span className="text-[8px] sm:text-[9px] font-bold text-slate-300">
+          <span className="text-[8px] sm:text-[9px] font-bold text-slate-400">
             {label}
           </span>
           <span className="text-[8px] sm:text-[9px] text-slate-500">{sub}</span>
@@ -356,19 +356,14 @@ export default function HeatMap({ weather, loading, status }: HeatMapProps) {
   const gridData = weather?.heatmapGrid || [];
 
   return (
-    <div className="w-full p-6 sm:p-8 rounded-[2rem] bg-slate-900 border border-slate-800 shadow-xl transition-all duration-700">
+    <div className="w-full p-6 sm:p-8 rounded-[2rem] bg-white shadow-xl transition-all duration-700">
       <div className="flex items-center gap-1.5 mb-4">
-        <MapIcon
-          size={16}
-          strokeWidth={3}
-          className={status?.textColor || "text-slate-400"}
-        />
-        <p className="text-xs font-black uppercase tracking-widest text-slate-300">
-          Live Regional Heat Index
+        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center sm:text-left">
+          Heat Map
         </p>
       </div>
 
-      <div className="w-full h-64 sm:h-72 rounded-[1rem] overflow-hidden border border-slate-700 bg-slate-800 relative z-0">
+      <div className="w-full h-64 sm:h-72 rounded-[1rem] overflow-hidden bg-slate-800 relative z-0">
         <MapContainer
           center={[14.55, 121.02]}
           zoom={10}
@@ -389,10 +384,6 @@ export default function HeatMap({ weather, loading, status }: HeatMapProps) {
           <Legend />
         </MapContainer>
       </div>
-
-      <p className="text-[10px] font-medium text-slate-500 mt-4 text-center leading-tight">
-        Colors represent regional heat variations across Metro Manila.
-      </p>
     </div>
   );
 }
