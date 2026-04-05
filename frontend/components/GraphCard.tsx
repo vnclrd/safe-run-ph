@@ -12,7 +12,13 @@ export default function GraphCard({
   loading,
   status,
 }: GraphCardProps) {
-  const hourlyData = weather?.hourly?.slice(0, 5) || [];
+  // ⚡ Find the index of the current hour within the 24-hour forecast
+  const currentHour = new Date().getHours();
+  const startIndex = weather?.hourly?.findIndex((h: any) => new Date(h.time * 1000).getHours() === currentHour);
+  
+  // ⚡ Slice 5 hours starting from the current hour (e.g., Now + 4 next hours)
+  // ⚡ If the index isn't found, it defaults to the first 5 hours of the day
+  const hourlyData = startIndex !== -1 ? weather?.hourly?.slice(startIndex, startIndex + 5) : (weather?.hourly?.slice(0, 5) || []);
 
   const getPoints = () => {
     if (hourlyData.length === 0) return "";
@@ -23,14 +29,12 @@ export default function GraphCard({
     const paddingBottom = 10;
 
     const usableHeight = height - paddingTop - paddingBottom;
-
     const spacing = hourlyData.length > 1 ? width / (hourlyData.length - 1) : 0;
 
     return hourlyData
       .map((data: any, i: number) => {
         const x = i * spacing;
         const y = paddingTop + (1 - data.humidity / 100) * usableHeight;
-
         return `${x},${y}`;
       })
       .join(" ");
@@ -92,7 +96,7 @@ export default function GraphCard({
                     x2="300"
                     y2={y}
                     stroke="white"
-                    strokeOpacity={val === 50 ? 0.25 : 0.1}
+                    strokeOpacity={val === 50 ? 0.5 : 0.1}
                     strokeWidth="1"
                     strokeDasharray="4 4"
                   />
@@ -114,7 +118,7 @@ export default function GraphCard({
                     x2={x}
                     y2="160"
                     stroke="white"
-                    strokeOpacity="0.1"
+                    strokeOpacity="0.5"
                     strokeWidth="1"
                     strokeDasharray="4 4"
                   />
@@ -147,6 +151,7 @@ export default function GraphCard({
                   {data.humidity}%
                 </p>
                 <p className="text-[8px] font-bold opacity-60 uppercase tracking-tighter">
+                  {/* ⚡ Displays the specific hour from the time data */}
                   {new Date(data.time * 1000).toLocaleTimeString([], {
                     hour: "numeric",
                     hour12: true,
