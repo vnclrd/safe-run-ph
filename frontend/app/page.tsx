@@ -6,8 +6,8 @@ import TemperatureCard from "@/components/TemperatureCard";
 import RunCommendationCard, {
   getTimeOfDay,
 } from "@/components/RunCommendationCard";
-import MetricGrid from "@/components/MetricGrid";
-import WeatherForecastCard from "@/components/WeatherForecastCard";
+import MetricCards from "@/components/MetricCards";
+import HourlyTemperatureForecastCard from "@/components/HourlyTemperatureForecastCard";
 import recommendations from "@/lib/recommendations.json";
 import metricMsgs from "@/lib/metrics.json";
 
@@ -329,7 +329,7 @@ export default function Home() {
           />
         </div>
 
-        <MetricGrid
+        <MetricCards
           weather={weather}
           loading={weatherLoading}
           humidity={{ desc: humidityDesc, color: humidityColor }}
@@ -339,7 +339,7 @@ export default function Home() {
         />
 
         <div className="lg:col-span-2">
-          <WeatherForecastCard
+          <HourlyTemperatureForecastCard
             weather={weather}
             loading={weatherLoading}
             status={status}

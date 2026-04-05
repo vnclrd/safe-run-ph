@@ -1,10 +1,11 @@
 "use client";
 
-type TimeOfDay = "umaga" | "hapon" | "gabi" | "madaling araw";
-
+type TimeOfDay = "umaga" | "tanghali" | "hapon" | "gabi" | "madaling araw";
+ 
 export function getTimeOfDay(hour: number): TimeOfDay {
-  if (hour >= 6 && hour < 12) return "umaga";
-  if (hour >= 12 && hour < 18) return "hapon";
+  if (hour >= 6 && hour < 11) return "umaga";
+  if (hour >= 11 && hour < 14) return "tanghali";
+  if (hour >= 14 && hour < 18) return "hapon";
   if (hour >= 18 && hour < 24) return "gabi";
   return "madaling araw";
 }

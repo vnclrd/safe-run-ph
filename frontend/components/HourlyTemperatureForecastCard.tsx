@@ -99,7 +99,7 @@ export default function WeatherForecastCard({
     >
       <div className="flex flex-col items-center gap-1 mb-4 text-white text-center">
         <h3 className="text-[20px] sm:text-[24px] font-black uppercase tracking-tight leading-none">
-          Hourly Forecast
+          Hourly Temperature Forecast
         </h3>
         <h3 className="text-[10px] sm:text-[12px] opacity-50 font-medium uppercase tracking-widest mt-1">
           {todayDate}
