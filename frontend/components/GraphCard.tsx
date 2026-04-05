@@ -12,12 +12,12 @@ export default function GraphCard({
   loading,
   status,
 }: GraphCardProps) {
-  // ⚡ Find the index of the current hour within the 24-hour forecast
+  // Find the index of the current hour within the 24-hour forecast
   const currentHour = new Date().getHours();
   const startIndex = weather?.hourly?.findIndex((h: any) => new Date(h.time * 1000).getHours() === currentHour);
   
-  // ⚡ Slice 5 hours starting from the current hour (e.g., Now + 4 next hours)
-  // ⚡ If the index isn't found, it defaults to the first 5 hours of the day
+  // Slice 5 hours starting from the current hour (e.g., Now + 4 next hours)
+  // If the index isn't found, it defaults to the first 5 hours of the day
   const hourlyData = startIndex !== -1 ? weather?.hourly?.slice(startIndex, startIndex + 5) : (weather?.hourly?.slice(0, 5) || []);
 
   const getPoints = () => {
@@ -151,7 +151,6 @@ export default function GraphCard({
                   {data.humidity}%
                 </p>
                 <p className="text-[8px] font-bold opacity-60 uppercase tracking-tighter">
-                  {/* ⚡ Displays the specific hour from the time data */}
                   {new Date(data.time * 1000).toLocaleTimeString([], {
                     hour: "numeric",
                     hour12: true,

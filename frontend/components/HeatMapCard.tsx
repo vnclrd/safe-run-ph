@@ -177,7 +177,7 @@ function CanvasHeatmapLayer({ gridData }: { gridData: any[] }) {
             const FEATHER_DEG = 0.018;
             const edgeAlpha = dist >= FEATHER_DEG ? 1.0 : dist <= 0 ? 0.0 : dist / FEATHER_DEG;
             const smoothAlpha = edgeAlpha * edgeAlpha * (3 - 2 * edgeAlpha);
-            const finalAlpha = Math.round(smoothAlpha * 185);
+            const finalAlpha = Math.round(smoothAlpha * 60);
             
             if (finalAlpha === 0) continue;
 
@@ -264,7 +264,7 @@ export default function HeatMap({ weather, loading, status }: HeatMapProps) {
 
   // Determine styles and map URL based on the time of day
   const mapUrl = isDaytime 
-    ? "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" 
+    ? "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" 
     : "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
     
   const mapBgColor = isDaytime ? "#f1f5f9" : "#1e293b";
@@ -292,7 +292,9 @@ export default function HeatMap({ weather, loading, status }: HeatMapProps) {
           scrollWheelZoom={true}
           style={{ height: "100%", width: "100%", backgroundColor: mapBgColor }}
         >
-          <TileLayer key={isDaytime ? "light" : "dark"} url={mapUrl} />
+          <TileLayer
+            url={mapUrl}
+          />
 
           <CanvasHeatmapLayer gridData={gridData} />
           <CityZoomButton lat={lat} lon={lon} />
