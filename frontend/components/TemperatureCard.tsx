@@ -56,9 +56,14 @@ export default function TemperatureBadge({
 
   return (
     <div
-      className={`w-full h-75 p-6 sm:p-8 rounded-[2rem] bg-gradient-to-br ${status.bgGradient} text-white shadow-xl relative overflow-hidden transition-all duration-700`}
+      className={`w-full h-75 p-6 sm:p-8 rounded-[2rem] bg-gradient-to-br ${status.bgGradient} text-white shadow-xl relative overflow-hidden transition-all duration-700 flex items-center`}
     >
-      <div className="relative z-10 flex flex-col justify-between h-full items-center sm:items-start text-center sm:text-left">
+      <div
+        className={`
+          w-full flex flex-col justify-between transition-all duration-1000 ease-out transform
+          ${!weather ? "opacity-0 -translate-x-6" : "opacity-100 translate-x-0"}
+        `}
+      >
         <div>
           <div className="flex items-center gap-1.5 opacity-80 mb-1 justify-center sm:justify-start">
             <Thermometer size={12} strokeWidth={3} />
@@ -76,7 +81,7 @@ export default function TemperatureBadge({
             </span>
           </div>
 
-          <p className="text-base sm:text-lg font-bold opacity-90 mt-0 md:mt-0">
+          <p className="text-base sm:text-lg font-bold opacity-90 mt-0 md:mt-0 mb-4 text-center sm:text-left">
             Heat Index: {weather?.heatIndex}°C
           </p>
         </div>

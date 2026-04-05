@@ -7,7 +7,7 @@ import RunCommendationCard, {
   getTimeOfDay,
 } from "@/components/RunCommendationCard";
 import MetricCards from "@/components/MetricCards";
-import HourlyTemperatureForecastCard from "@/components/HourlyTemperatureForecastCard";
+import TemperatureForecastCard from "@/components/TemperatureForecastCard";
 import recommendations from "@/lib/recommendations.json";
 import metricMsgs from "@/lib/metrics.json";
 
@@ -339,7 +339,7 @@ export default function Home() {
         />
 
         <div className="lg:col-span-2">
-          <HourlyTemperatureForecastCard
+          <TemperatureForecastCard
             weather={weather}
             loading={weatherLoading}
             status={status}
