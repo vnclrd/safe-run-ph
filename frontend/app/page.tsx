@@ -2,8 +2,10 @@
 import { useEffect, useState } from "react";
 import { httpsCallable } from "firebase/functions";
 import { functions } from "@/lib/firebase";
-import TemperatureBadge from "@/components/TemperatureBadge";
-import RunCommendation, { getTimeOfDay } from "@/components/RunCommendation";
+import TemperatureCard from "@/components/TemperatureCard";
+import RunCommendationCard, {
+  getTimeOfDay,
+} from "@/components/RunCommendationCard";
 import MetricGrid from "@/components/MetricGrid";
 import WeatherForecastCard from "@/components/WeatherForecastCard";
 import recommendations from "@/lib/recommendations.json";
@@ -295,13 +297,14 @@ export default function Home() {
                 isBranding ? "opacity-0" : "opacity-100"
               }`}
             >
-              {greeting}
-              <br className="lg:hidden" /> Runner!
+              <span className="whitespace-nowrap">{greeting}</span>
+              <br />
+              <span>Runner!</span>
             </span>
 
             {/* Branding */}
             <span
-              className={`absolute transition-opacity duration-300 ease-in-out text-center ${
+              className={`absolute transition-opacity duration-300 ease-in-out text-center whitespace-nowrap ${
                 isBranding ? "opacity-100" : "opacity-0"
               }`}
             >
@@ -312,13 +315,13 @@ export default function Home() {
       </div>
 
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
-        <TemperatureBadge
+        <TemperatureCard
           weather={weather}
           loading={weatherLoading}
           status={status}
         />
         <div className="lg:col-span-2">
-          <RunCommendation
+          <RunCommendationCard
             recommendation={recommendation}
             loading={weatherLoading}
             status={status}

@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Thermometer, MapPin, Clock2 } from "lucide-react";
-import { getTimeOfDay } from "./RunCommendation";
+import { getTimeOfDay } from "./RunCommendationCard";
 
 interface TemperatureBadgeProps {
   weather: {
