@@ -56,7 +56,7 @@ export default function TemperatureBadge({
 
   return (
     <div
-      className={`w-full h-75 p-6 sm:p-8 rounded-[2rem] bg-gradient-to-br ${status.bgGradient} text-white shadow-xl relative overflow-hidden transition-all duration-700 flex items-center`}
+      className={`w-full h-75 p-6 sm:p-8 rounded-[2rem] bg-gradient-to-br ${status.bgGradient} text-white shadow-sm relative overflow-hidden transition-all duration-700 flex items-center`}
     >
       <div
         className={`

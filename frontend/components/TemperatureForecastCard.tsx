@@ -93,7 +93,7 @@ export default function WeatherForecastCard({
 
   return (
     <div
-      className={`w-full h-75 ${getAccentBg()} backdrop-blur-xl border rounded-[2rem] shadow-2xl overflow-hidden p-6 flex flex-col justify-center transition-all duration-1000 ease-out transform ${
+      className={`w-full h-75 ${getAccentBg()} backdrop-blur-xl border rounded-[2rem] shadow-sm overflow-hidden p-6 flex flex-col justify-center transition-all duration-1000 ease-out transform ${
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
       }`}
     >

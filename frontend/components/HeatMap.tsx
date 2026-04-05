@@ -271,7 +271,7 @@ export default function HeatMap({ weather, loading, status }: HeatMapProps) {
   const containerBgClass = isDaytime ? "bg-slate-100" : "bg-slate-800";
 
   return (
-    <div className="w-full h-75 p-6 sm:p-8 rounded-[2rem] bg-white shadow-xl transition-all duration-700">
+    <div className="w-full h-75 p-6 sm:p-8 rounded-[2rem] bg-white shadow-sm transition-all duration-700">
       <div className="flex items-center gap-1.5 mb-4">
         <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center sm:text-left">
           Heat Map
