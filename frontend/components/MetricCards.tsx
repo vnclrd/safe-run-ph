@@ -22,7 +22,7 @@ function MiniMetricCard({
   progress,
 }: MiniMetricCardProps) {
   return (
-    <div className="gap-2 flex flex-col justify-center items-center p-4 rounded-[1.5rem] bg-white border border-slate-100 shadow-sm transition-all duration-700">
+    <div className="w-full h-full gap-2 flex flex-col justify-center items-center p-4 rounded-[1.5rem] bg-white border border-slate-100 shadow-sm transition-all duration-700">
       <div className="flex items-center gap-1.5 text-slate-400 mb-1">
         {Icon && <Icon size={12} strokeWidth={3} />}
         <p className="text-[10px] font-black uppercase tracking-widest">
@@ -82,7 +82,7 @@ export default function MetricGrid({
   wind,
 }: MetricGridProps) {
   return (
-    <div className="grid grid-cols-2 grid-rows-2 gap-4">
+    <div className="w-full h-75 grid grid-cols-2 grid-rows-2 gap-4">
       <MiniMetricCard
         label="Humidity"
         icon={CloudRain}
