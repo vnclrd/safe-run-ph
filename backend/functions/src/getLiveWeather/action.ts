@@ -111,7 +111,7 @@ export async function fetchAndCacheWeather(lat?: number, lon?: number) {
   ) {
     weatherData = snap.data();
   } else {
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,precipitation,wind_speed_10m,wind_direction_10m,uv_index&hourly=temperature_2m,weather_code,precipitation_probability&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FManila&forecast_days=1`;
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,precipitation,wind_speed_10m,wind_direction_10m,uv_index&hourly=temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m,uv_index,weather_code,precipitation_probability&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FManila&forecast_days=1`;
     const res = await fetch(url);
     const data = (await res.json()) as any;
 
@@ -131,8 +131,12 @@ export async function fetchAndCacheWeather(lat?: number, lon?: number) {
       todayLo: Math.round(data.daily.temperature_2m_min[0]),
       locationLabel: rawCity,
       hourly: data.hourly.time.slice(0, 24).map((time: string, i: number) => ({
-        time: new Date(time).getHours(),
+        time: new Date(time).getTime() / 1000, 
         temp: Math.round(data.hourly.temperature_2m[i]),
+        humidity: data.hourly.relative_humidity_2m[i],
+        precip: data.hourly.precipitation[i],
+        windSpeed: Math.round(data.hourly.wind_speed_10m[i]),
+        uvIndex: data.hourly.uv_index[i],
         code: data.hourly.weather_code[i],
         pop: data.hourly.precipitation_probability[i],
       })),
