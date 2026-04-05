@@ -67,7 +67,8 @@ async function getMetroManilaHeatGrid() {
   const lats = METRO_MANILA_CITIES.map((c) => c.lat).join(",");
   const lons = METRO_MANILA_CITIES.map((c) => c.lon).join(",");
 
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lats}&longitude=${lons}&current=temperature_2m&timezone=Asia%2FManila`;
+  // Get 'apparent_temperature' in the URL
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lats}&longitude=${lons}&current=apparent_temperature&timezone=Asia%2FManila`;
   const res = await fetch(url);
 
   const dataArray = (await res.json()) as any[];
@@ -75,7 +76,8 @@ async function getMetroManilaHeatGrid() {
   const grid = METRO_MANILA_CITIES.map((city, index) => ({
     lat: city.lat,
     lon: city.lon,
-    temp: Math.round(dataArray[index]?.current?.temperature_2m || 32),
+    // Extract 'apparent_temperature' from the response
+    temp: Math.round(dataArray[index]?.current?.apparent_temperature || 32),
     name: city.name,
   }));
 
