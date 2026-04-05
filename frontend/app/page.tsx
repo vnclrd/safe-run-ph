@@ -8,6 +8,7 @@ import RunCommendationCard, {
 } from "@/components/RunCommendationCard";
 import MetricCards from "@/components/MetricCards";
 import TemperatureForecastCard from "@/components/TemperatureForecastCard";
+import dynamic from "next/dynamic";
 import recommendations from "@/lib/recommendations.json";
 import metricMsgs from "@/lib/metrics.json";
 
@@ -22,6 +23,12 @@ export default function Home() {
   // Time-based States
   const [greeting, setGreeting] = useState("Good morning,");
   const [timeOfDay, setTimeOfDay] = useState<ReturnType<typeof getTimeOfDay>>("umaga");
+
+  // Heat Map
+  const HeatMap = dynamic(() => import("@/components/HeatMap"), { 
+    ssr: false,
+    loading: () => <div className="w-full h-[22rem] rounded-[2rem] bg-white animate-pulse" />
+  });
 
   // 1. SIDE EFFECTS: Timers and Data Fetching
   useEffect(() => {
@@ -266,6 +273,14 @@ export default function Home() {
             weather={weather}
             loading={weatherLoading}
             status={status}
+          />
+        </div>
+
+        <div className="lg:col-span-2 lg:col-start-2">
+          <HeatMap 
+            weather={weather} 
+            loading={weatherLoading} 
+            status={status} 
           />
         </div>
 
