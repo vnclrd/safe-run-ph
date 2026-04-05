@@ -25,7 +25,7 @@ export default function Home() {
   const [timeOfDay, setTimeOfDay] = useState<ReturnType<typeof getTimeOfDay>>("umaga");
 
   // Heat Map
-  const HeatMap = dynamic(() => import("@/components/HeatMapCard"), { 
+  const HeatMapCard = dynamic(() => import("@/components/HeatMapCard"), { 
     ssr: false,
     loading: () => <div className="w-full h-[22rem] rounded-[2rem] bg-white animate-pulse" />
   });
@@ -106,7 +106,7 @@ export default function Home() {
       return pool ? pool[Math.floor(Math.random() * pool.length)] : "";
     };
 
-    const temp = weather.temp || weather.heatIndex || 0;
+    const effectiveTemp = weather.heatIndex || weather.temp || 0; 
     const precip = weather.precip || 0;
     const wind = weather.windSpeed || 0;
     const currentUv = weather.uvIndex || 0;
@@ -114,17 +114,16 @@ export default function Home() {
 
     // -- Voting Escalation Logic --
     const extremeCount =
-      (temp >= 42 ? 1 : 0) +
+      (effectiveTemp >= 42 ? 1 : 0) +
       (precip >= 7.6 ? 1 : 0) +
       (wind >= 39 ? 1 : 0) +
-      (currentUv >= 11 ? 1 : 0) +
-      (hum >= 85 ? 1 : 0);
+      (currentUv >= 11 ? 1 : 0);
 
     const isRainy = precip > 0;
     const isWindy = wind >= 29;
     const isSunny = currentUv >= 6;
     const isHumid = hum > 65;
-    const isWarm = temp >= 32;
+    const isWarm = effectiveTemp >= 32;
 
     const cautionCount =
       (isRainy ? 1 : 0) +
@@ -143,7 +142,7 @@ export default function Home() {
     } else if (cautionCount >= 1) {
       category = "CAUTION";
       status = { bgGradient: "from-amber-400 to-orange-500", textColor: "text-orange-500", label: "CAUTION" };
-    } else if (temp < 26) {
+    } else if (effectiveTemp < 26) {
       category = "CHILLY";
       status = { bgGradient: "from-blue-500 to-indigo-600", textColor: "text-blue-600", label: "CHILLY" };
     } else {
@@ -277,7 +276,7 @@ export default function Home() {
         </div>
 
         <div className="lg:col-span-2 lg:col-start-2">
-          <HeatMap 
+          <HeatMapCard
             weather={weather} 
             loading={weatherLoading} 
             status={status} 
