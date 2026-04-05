@@ -124,7 +124,9 @@ export default function WeatherForecastCard({
           className={`${getInnerAccentBg()} border flex overflow-x-auto gap-1.5 p-2 scrollbar-hide rounded-[1.5rem] relative`}
         >
           {weather.hourly.map((h: any, i: number) => {
-            const isNow = h.time === currentHour;
+            const date = new Date(h.time * 1000);
+            const hour = date.getHours();
+            const isNow = hour === currentHour;
 
             return (
               <div
@@ -141,11 +143,11 @@ export default function WeatherForecastCard({
                 >
                   {isNow
                     ? "Now"
-                    : `${h.time % 12 || 12}${h.time >= 12 ? "PM" : "AM"}`}
+                    : `${hour % 12 || 12}${hour >= 12 ? "PM" : "AM"}`}
                 </span>
 
                 <span className="text-2xl mt-1">
-                  {getWeatherIcon(h.code, h.time)}
+                  {getWeatherIcon(h.code, hour)}
                 </span>
 
                 <span
