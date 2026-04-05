@@ -277,7 +277,7 @@ export default function Home() {
         className={`
           flex items-center justify-center rounded-[2rem] overflow-hidden 
           transition-all duration-1000 ease-in-out
-          ${showHero ? "h-[90dvh] mb-4" : "h-[15dvh] sm:h-[25dvh] md:h-[10dvh] md:mt-4 mb-4 md:mb-8"}
+          ${showHero ? "h-[90dvh] mb-4" : "h-[5dvh] md:mt-4 mb-4 md:mb-8"}
         `}
       >
         <h2
