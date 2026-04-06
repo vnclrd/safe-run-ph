@@ -1,4 +1,5 @@
 "use client";
+import { SportShoe } from "lucide-react";
 
 type TimeOfDay = "umaga" | "tanghali" | "hapon" | "gabi" | "madaling araw";
  
@@ -66,7 +67,8 @@ export default function RunCommendation({
         }`}
       >
         {/* 1. Top Label */}
-        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center sm:text-left mb-2">
+        <p className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center sm:text-left mb-2">
+          <SportShoe className="w-4 h-4" />
           RunCommendation
         </p>
 

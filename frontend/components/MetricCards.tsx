@@ -101,14 +101,14 @@ export default function MetricGrid({
     <div className="w-full h-75 grid grid-cols-2 grid-rows-2 gap-4">
       <MiniMetricCard
         label="Humidity"
-        icon={CloudRain}
+        icon={Droplets}
         value={loading ? "---" : `${weather?.humidity || 0}%`}
         description={loading ? "" : humidity.desc}
         colorClass={loading ? "text-slate-400" : humidity.color}
       />
       <MiniMetricCard
         label="Precipitation"
-        icon={Droplets}
+        icon={CloudRain}
         value={loading ? "---" : `${weather?.precip || 0}mm`}
         description={loading ? "" : precip.desc}
         colorClass={loading ? "text-slate-400" : precip.color}
