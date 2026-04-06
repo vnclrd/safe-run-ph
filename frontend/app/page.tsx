@@ -109,6 +109,14 @@ export default function Home() {
       return pool ? pool[Math.floor(Math.random() * pool.length)] : "";
     };
 
+    const getUvHexColor = (uv: number) => {
+      if (uv <= 2) return "#34d399";  // Low (Green)
+      if (uv <= 5) return "#fbbf24";  // Moderate (Yellow)
+      if (uv <= 7) return "#f97316";  // High (Orange)
+      if (uv <= 10) return "#f43f5e"; // Very High (Red)
+      return "#ff00ff";               // Extreme (Magenta)
+    };
+
     const effectiveTemp = weather.heatIndex || weather.temp || 0; 
     const precip = weather.precip || 0;
     const wind = weather.windSpeed || 0;
@@ -146,7 +154,7 @@ export default function Home() {
         bgGradient: "from-orange-500 to-rose-500",
         bgSubtle: "bg-rose-50",
         bgColor: "bg-rose-500/90",
-        textColor: "text-rose-500",
+        textColor: "text-rose-600",
         label: "DANGER" 
       };
     } 
@@ -168,7 +176,7 @@ export default function Home() {
         bgGradient: "from-amber-400 to-orange-500",
         bgSubtle: "bg-orange-50",
         bgColor: "bg-orange-600/60", 
-        textColor: "text-orange-500", 
+        textColor: "text-orange-600", 
         label: "CAUTION" 
       };
     } 
@@ -205,7 +213,8 @@ export default function Home() {
     // UV
     const uvLvl = currentUv >= 11 ? "extreme" : currentUv >= 8 ? "extreme" : currentUv >= 6 ? "high" : currentUv >= 3 ? "moderate" : "low";
     const uvLabel = currentUv >= 11 ? "Extreme" : currentUv >= 8 ? "Very High" : currentUv >= 6 ? "High" : currentUv >= 3 ? "Moderate" : "Low";
-    const uvColor = currentUv >= 11 ? "text-rose-500" : currentUv >= 8 ? "text-orange-500" : currentUv >= 3 ? "text-amber-500" : "text-emerald-500";
+    const uvValue = weather?.uvIndex || 0;
+    const uvHex = getUvHexColor(uvValue);
     
     // Humidity
     const hLvl = hum < 30 ? "low" : hum <= 60 ? "optimal" : "high";
@@ -223,7 +232,7 @@ export default function Home() {
       status,
       recommendation: randomAdvice,
       metrics: {
-        uv: { desc: getRand("uvIndex", uvLvl), color: uvColor, percent: Math.min((currentUv / 11) * 100, 100), status: uvLabel },
+        uv: { desc: getRand("uvIndex", uvLvl), color: uvHex, percent: Math.min((currentUv / 11) * 100, 100), status: uvLabel },
         humidity: { desc: getRand("humidity", hLvl), color: humColor },
         precip: { desc: getRand("precipitation", pLvl), color: precipColor },
         wind: { desc: getRand("windSpeed", wLvl), color: windColor },

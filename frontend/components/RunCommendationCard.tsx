@@ -72,9 +72,8 @@ export default function RunCommendation({
 
         {/* 2. Middle Content */}
         <div className="flex-grow flex flex-col justify-center items-center sm:items-start space-y-2 sm:space-y-4 overflow-hidden">
-          <h2
-            className={`text-3xl sm:text-5xl font-black tracking-tight leading-none text-center sm:text-left ${status.textColor}`}
-          >
+          <h2 className={`text-3xl sm:text-5xl font-black tracking-tight leading-none text-center sm:text-left 
+            bg-gradient-to-r ${status.bgGradient} bg-clip-text text-transparent`}>
             {recommendation?.title}
           </h2>
 

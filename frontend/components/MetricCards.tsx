@@ -23,6 +23,9 @@ function MiniMetricCard({
   progress,
   compact,
 }: MiniMetricCardProps) {
+
+  const isHex = colorClass?.startsWith("#");
+
   return (
     <div
       className={`flex flex-col justify-center items-center p-4 rounded-[1.5rem] bg-white border border-slate-100 shadow-sm transition-all duration-700 ${
@@ -37,12 +40,16 @@ function MiniMetricCard({
       </div>
 
       <div className="flex flex-col items-center leading-none">
-        <p className={`text-3xl sm:text-2xl font-black italic ${colorClass}`}>
+        <p 
+          className={`text-3xl sm:text-2xl font-black italic ${!isHex ? colorClass : ""}`}
+          style={{ color: isHex ? colorClass : undefined }}
+        >
           {value}
         </p>
         {subtitle && (
-          <p
-            className={`text-[10px] font-black uppercase tracking-wider ${colorClass} opacity-80 mt-1`}
+          <p 
+            className={`text-[10px] font-black uppercase tracking-wider mt-1 opacity-80 ${!isHex ? colorClass : ""}`}
+            style={{ color: isHex ? colorClass : undefined }}
           >
             {subtitle}
           </p>
@@ -56,8 +63,11 @@ function MiniMetricCard({
             className="h-full rounded-full transition-all duration-1000 ease-out"
             style={{
               width: `${Math.max(0, Math.min(progress, 100))}%`,
-              backgroundImage:
-                "linear-gradient(to right, #34d399, #fbbf24, #f43f5e)",
+              // 5-color sequence: Emerald -> Amber -> Orange -> Rose -> Violet
+              backgroundImage: "linear-gradient(to right, #34d399, #fbbf24, #f97316, #f43f5e, #ff00ff )",
+              // This magic line ensures the gradient is always the size of the 100% width parent
+              backgroundSize: progress > 0 ? `${(100 / progress) * 100}% 100%` : "100% 100%",
+              backgroundRepeat: "no-repeat"
             }}
           />
         </div>
