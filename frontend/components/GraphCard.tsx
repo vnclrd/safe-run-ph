@@ -12,32 +12,54 @@ export default function GraphCard({
   loading,
   status,
 }: GraphCardProps) {
-  // Find the index of the current hour within the 24-hour forecast
+  // 1. Find the index of the current hour
   const currentHour = new Date().getHours();
-  const startIndex = weather?.hourly?.findIndex((h: any) => new Date(h.time * 1000).getHours() === currentHour);
-  
-  // Slice 5 hours starting from the current hour (e.g., Now + 4 next hours)
-  // If the index isn't found, it defaults to the first 5 hours of the day
-  const hourlyData = startIndex !== -1 ? weather?.hourly?.slice(startIndex, startIndex + 5) : (weather?.hourly?.slice(0, 5) || []);
+  const startIndex = weather?.hourly?.findIndex(
+    (h: any) => new Date(h.time * 1000).getHours() === currentHour
+  );
 
-  const getPoints = () => {
+  const hourlyDataRaw = (weather?.hourly && startIndex !== -1 && startIndex !== undefined)
+    ? weather.hourly.slice(startIndex, startIndex + 5)
+    : (weather?.hourly?.slice(0, 5) || []); // Fallback to first 5 hours or empty array
+
+  const hourlyData = hourlyDataRaw.map((data: any, i: number) =>
+    i === 0 && weather?.humidity !== undefined
+      ? { ...data, humidity: weather.humidity }
+      : data
+  );
+
+  const getCurvePath = (isArea: boolean = false) => {
     if (hourlyData.length === 0) return "";
 
     const width = 300;
     const height = 160;
     const paddingTop = 10;
     const paddingBottom = 10;
-
     const usableHeight = height - paddingTop - paddingBottom;
     const spacing = hourlyData.length > 1 ? width / (hourlyData.length - 1) : 0;
 
-    return hourlyData
-      .map((data: any, i: number) => {
-        const x = i * spacing;
-        const y = paddingTop + (1 - data.humidity / 100) * usableHeight;
-        return `${x},${y}`;
-      })
-      .join(" ");
+    const points = hourlyData.map((data: any, i: number) => ({
+      x: i * spacing,
+      y: paddingTop + (1 - data.humidity / 100) * usableHeight,
+    }));
+
+    const command = (point: { x: number, y: number }, i: number, a: any[]) => {
+      if (i === 0) return `M ${point.x},${point.y}`;
+      const smoothing = 0.15;
+      const prev = a[i - 1];
+      const next = a[i + 1] || point;
+      const prevPrev = a[i - 2] || prev;
+
+      const cp1x = prev.x + (point.x - prevPrev.x) * smoothing;
+      const cp1y = prev.y + (point.y - prevPrev.y) * smoothing;
+      const cp2x = point.x - (next.x - prev.x) * smoothing;
+      const cp2y = point.y - (next.y - prev.y) * smoothing;
+
+      return `C ${cp1x},${cp1y} ${cp2x},${cp2y} ${point.x},${point.y}`;
+    };
+
+    const d = points.map((p: { x: number; y: number }, i: number, a: { x: number; y: number }[]) => command(p, i, a)).join(" ");
+    return isArea ? `${d} L 300,160 L 0,160 Z` : d;
   };
 
   if (loading) {
@@ -72,7 +94,6 @@ export default function GraphCard({
                 </linearGradient>
               </defs>
 
-              {/* Border */}
               <rect
                 x="0"
                 y="0"
@@ -107,9 +128,7 @@ export default function GraphCard({
               {hourlyData.map((_: any, i: number) => {
                 const spacing =
                   hourlyData.length > 1 ? 300 / (hourlyData.length - 1) : 0;
-
                 const x = i * spacing;
-
                 return (
                   <line
                     key={`v-${i}`}
@@ -125,21 +144,22 @@ export default function GraphCard({
                 );
               })}
 
-              {/* Area */}
+              {/* The Shaded Area */}
               <path
-                d={`M 0,160 L ${getPoints()} L 300,160 Z`}
+                d={getCurvePath(true)}
                 fill="url(#areaGrad)"
+                className="transition-all duration-1000"
               />
 
-              {/* Line */}
-              <polyline
+              {/* Main Line */}
+              <path
+                d={getCurvePath(false)}
                 fill="none"
                 stroke="white"
                 strokeWidth="3"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                points={getPoints()}
-                className="opacity-90"
+                className="opacity-90 transition-all duration-1000"
               />
             </svg>
           </div>
