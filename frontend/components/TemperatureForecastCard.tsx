@@ -66,11 +66,11 @@ export default function WeatherForecastCard({
       case "DANGER":
         return "bg-rose-500";
       case "CAUTION":
-        return "bg-orange-500";
+        return "bg-amber-500";
       case "GOOD":
-        return "bg-emerald-700";
+        return "bg-emerald-500";
       case "CHILLY":
-        return "bg-blue-700";
+        return "bg-sky-500";
       default:
         return "bg-black/20";
     }
@@ -139,7 +139,7 @@ export default function WeatherForecastCard({
                 }`}
               >
                 <span
-                  className={`text-[10px] font-black uppercase tracking-tighter mb-2 ${isNow ? status.textColor : "text-white/60"}`}
+                  className={`text-[10px] font-black uppercase tracking-tighter mb-2 text-white`}
                 >
                   {isNow
                     ? "Now"

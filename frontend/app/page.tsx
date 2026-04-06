@@ -154,7 +154,7 @@ export default function Home() {
     else if (effectiveTemp < 26) {
       category = "CHILLY";
       status = { 
-        bgGradient: "from-blue-500 to-indigo-600",
+        bgGradient: "from-sky-400 to-blue-500",
         bgSubtle: "bg-indigo-50", 
         bgColor: "bg-blue-600/60", 
         textColor: "text-blue-600", 
@@ -165,7 +165,7 @@ export default function Home() {
     else if (cautionCount >= 1) {
       category = "CAUTION";
       status = { 
-        bgGradient: "from-amber-400 to-orange-500", 
+        bgGradient: "from-amber-400 to-orange-500",
         bgSubtle: "bg-orange-50",
         bgColor: "bg-orange-600/60", 
         textColor: "text-orange-500", 
@@ -176,7 +176,7 @@ export default function Home() {
     else {
       category = "GOOD";
       status = { 
-        bgGradient: "from-emerald-500 to-teal-600",
+        bgGradient: "from-emerald-400 to-cyan-500",
         bgSubtle: "bg-teal-50",
         bgColor: "bg-emerald-600/60", 
         textColor: "text-emerald-600", 
