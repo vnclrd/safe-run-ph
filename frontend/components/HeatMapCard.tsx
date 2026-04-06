@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Map as MapIcon, Crosshair } from "lucide-react";
 import { MapContainer, TileLayer, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
@@ -273,7 +273,8 @@ export default function HeatMap({ weather, loading, status }: HeatMapProps) {
   return (
     <div className="w-full h-75 p-6 sm:p-8 rounded-[2rem] bg-white shadow-sm transition-all duration-700">
       <div className="flex items-center gap-1.5 mb-4">
-        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center sm:text-left">
+        <p className="flex gap-1.5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center sm:text-left">
+          <MapIcon size={12} strokeWidth={3} />
           Heat Index Map
         </p>
       </div>

@@ -94,6 +94,7 @@ export default function Home() {
   const analysis = useMemo(() => {
     const defaultStatus = {
       bgGradient: "bg-slate-200",
+      bgSubtle: "bg-rose-50",
       bgColor: "bg-slate-200",
       textColor: "text-slate-400",
       label: "LOADING",
@@ -142,9 +143,10 @@ export default function Home() {
     if (extremeCount >= 1 || cautionCount >= 3) {
       category = "DANGER";
       status = { 
-        bgGradient: "from-red-600 to-rose-700", 
-        bgColor: "bg-rose-600/80", 
-        textColor: "text-red-600", 
+        bgGradient: "from-orange-500 to-rose-500",
+        bgSubtle: "bg-rose-50",
+        bgColor: "bg-rose-500/90",
+        textColor: "text-rose-500",
         label: "DANGER" 
       };
     } 
@@ -152,7 +154,8 @@ export default function Home() {
     else if (effectiveTemp < 26) {
       category = "CHILLY";
       status = { 
-        bgGradient: "from-blue-500 to-indigo-600", 
+        bgGradient: "from-blue-500 to-indigo-600",
+        bgSubtle: "bg-indigo-50", 
         bgColor: "bg-blue-600/60", 
         textColor: "text-blue-600", 
         label: "CHILLY" 
@@ -163,7 +166,8 @@ export default function Home() {
       category = "CAUTION";
       status = { 
         bgGradient: "from-amber-400 to-orange-500", 
-        bgColor: "bg-orange-600/70", 
+        bgSubtle: "bg-orange-50",
+        bgColor: "bg-orange-600/60", 
         textColor: "text-orange-500", 
         label: "CAUTION" 
       };
@@ -172,7 +176,8 @@ export default function Home() {
     else {
       category = "GOOD";
       status = { 
-        bgGradient: "from-emerald-500 to-teal-600", 
+        bgGradient: "from-emerald-500 to-teal-600",
+        bgSubtle: "bg-teal-50",
         bgColor: "bg-emerald-600/60", 
         textColor: "text-emerald-600", 
         label: "GOOD" 

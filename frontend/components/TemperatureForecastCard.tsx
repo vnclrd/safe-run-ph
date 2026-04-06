@@ -64,9 +64,9 @@ export default function WeatherForecastCard({
   const getAccentBg = () => {
     switch (status.label) {
       case "DANGER":
-        return "bg-red-700";
+        return "bg-rose-500";
       case "CAUTION":
-        return "bg-amber-700";
+        return "bg-orange-500";
       case "GOOD":
         return "bg-emerald-700";
       case "CHILLY":
@@ -79,21 +79,21 @@ export default function WeatherForecastCard({
   const getInnerAccentBg = () => {
     switch (status.label) {
       case "DANGER":
-        return "bg-black/40 border-red-900/20";
+        return "bg-black/40";
       case "CAUTION":
-        return "bg-black/40 border-amber-900/20";
+        return "bg-black/40";
       case "GOOD":
-        return "bg-black/40 border-emerald-900/20";
+        return "bg-black/40";
       case "CHILLY":
-        return "bg-black/40 border-blue-900/20";
+        return "bg-black/40";
       default:
-        return "bg-black/40 border-white/5";
+        return "bg-black/40";
     }
   };
 
   return (
     <div
-      className={`w-full h-75 ${getAccentBg()} backdrop-blur-xl border rounded-[2rem] shadow-sm overflow-hidden p-6 flex flex-col justify-center transition-all duration-1000 ease-out transform ${
+      className={`w-full h-75 ${getAccentBg()} backdrop-blur-xl rounded-[2rem] shadow-sm overflow-hidden p-6 flex flex-col justify-center transition-all duration-1000 ease-out transform ${
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
       }`}
     >
@@ -121,7 +121,7 @@ export default function WeatherForecastCard({
 
         <div
           ref={scrollRef}
-          className={`${getInnerAccentBg()} border flex overflow-x-auto gap-1.5 p-2 scrollbar-hide rounded-[1.5rem] relative`}
+          className={`${getInnerAccentBg()} flex overflow-x-auto gap-1.5 p-2 scrollbar-hide rounded-[1.5rem] relative`}
         >
           {weather.hourly.map((h: any, i: number) => {
             const date = new Date(h.time * 1000);

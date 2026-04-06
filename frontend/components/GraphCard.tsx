@@ -4,7 +4,7 @@ import { Droplets } from "lucide-react";
 interface GraphCardProps {
   weather: any;
   loading: boolean;
-  status: { label: string; bgGradient: string; textColor: string };
+  status: { label: string; bgColor: string; textColor: string };
 }
 
 export default function GraphCard({
@@ -48,7 +48,7 @@ export default function GraphCard({
 
   return (
     <div
-      className={`w-full h-75 p-6 sm:p-8 rounded-[2rem] bg-gradient-to-br ${status.bgGradient} text-white shadow-xl relative overflow-hidden transition-all duration-700`}
+      className={`w-full h-75 p-6 sm:p-8 rounded-[2rem] ${status.bgColor} bg-opacity-90 bg-gradient-to-b from-white/10 to-transparent text-white shadow-xl relative overflow-hidden transition-all duration-700`}
     >
       <div className="relative z-10 flex flex-col h-full">
         <div className="flex items-center gap-1.5 opacity-80">
