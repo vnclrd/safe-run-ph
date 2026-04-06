@@ -76,7 +76,7 @@ export default function GraphCard({
         <div className="flex items-center gap-1.5 opacity-80">
           <Droplets size={12} strokeWidth={3} />
           <p className="text-[10px] font-black uppercase tracking-[0.2em]">
-            Humidity Graph
+            Humidity Forecast
           </p>
         </div>
 
