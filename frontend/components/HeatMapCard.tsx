@@ -245,7 +245,7 @@ export default function HeatMap({ weather, loading, status }: HeatMapProps) {
       setIsDaytime(hour >= 6 && hour < 18);
     };
 
-    checkTime(); // Run immediately
+    checkTime();
     const timer = setInterval(checkTime, 60000); // Check every 60 seconds
     return () => clearInterval(timer);
   }, []);
