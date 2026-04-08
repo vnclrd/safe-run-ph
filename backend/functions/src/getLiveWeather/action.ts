@@ -4,7 +4,7 @@ const db = getFirestore();
 const NCR_LAT = 14.5995;
 const NCR_LON = 120.9842;
 
-// 1. Define the Metro Manila Grid
+// 1. Define the Metro Manila Grid for the HeatMap
 const METRO_MANILA_CITIES = [
   { name: "Manila", lat: 14.5995, lon: 120.9842 },
   { name: "Quezon City", lat: 14.676, lon: 121.0437 },
@@ -49,13 +49,11 @@ async function getCityName(lat: number, lon: number): Promise<string> {
   }
 }
 
-// 2. Helper to fetch all MM cities in one burst
 async function getMetroManilaHeatGrid() {
   const cacheKey = `ncr_heatmap_grid`;
   const cacheRef = db.collection("weather_cache").doc(cacheKey);
   const snap = await cacheRef.get();
 
-  // Cache grid heavily (30 mins) as it's an aggregate background feature
   if (
     snap.exists &&
     Date.now() - snap.data()?.timestamp.toDate().getTime() < 30 * 60 * 1000
@@ -63,20 +61,16 @@ async function getMetroManilaHeatGrid() {
     return snap.data()?.grid;
   }
 
-  // Create comma-separated lists for the bulk API call
   const lats = METRO_MANILA_CITIES.map((c) => c.lat).join(",");
   const lons = METRO_MANILA_CITIES.map((c) => c.lon).join(",");
 
-  // Get 'apparent_temperature' in the URL
   const url = `https://api.open-meteo.com/v1/forecast?latitude=${lats}&longitude=${lons}&current=apparent_temperature&timezone=Asia%2FManila`;
   const res = await fetch(url);
-
   const dataArray = (await res.json()) as any[];
 
   const grid = METRO_MANILA_CITIES.map((city, index) => ({
     lat: city.lat,
     lon: city.lon,
-    // Extract 'apparent_temperature' from the response
     temp: Math.round(dataArray[index]?.current?.apparent_temperature || 32),
     name: city.name,
   }));
@@ -130,10 +124,10 @@ export async function fetchAndCacheWeather(lat?: number, lon?: number) {
       todayHi: Math.round(data.daily.temperature_2m_max[0]),
       todayLo: Math.round(data.daily.temperature_2m_min[0]),
       locationLabel: rawCity,
-      hourly: data.hourly.time.slice(0, 24).map((time: string, i: number) => ({
-        time: new Date(time).getTime() / 1000,
+      hourly: data.hourly.time.slice(0, 24).map((timeStr: string, i: number) => ({
+        time: new Date(timeStr + "+08:00").getTime() / 1000, 
         temp: Math.round(data.hourly.temperature_2m[i]),
-        feelsLike: Math.round(data.hourly.apparent_temperature[i]), // ✅ NEW
+        feelsLike: Math.round(data.hourly.apparent_temperature[i]),
         humidity: data.hourly.relative_humidity_2m[i],
         precip: data.hourly.precipitation[i],
         windSpeed: Math.round(data.hourly.wind_speed_10m[i]),
@@ -146,7 +140,6 @@ export async function fetchAndCacheWeather(lat?: number, lon?: number) {
     await cacheRef.set(weatherData);
   }
 
-  // 3. Fetch the grid and attach it to the final response
   try {
     const gridData = await getMetroManilaHeatGrid();
     return { ...weatherData, heatmapGrid: gridData };
