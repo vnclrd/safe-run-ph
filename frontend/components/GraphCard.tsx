@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react"; 
-import { Droplets, CloudRain, Sun } from "lucide-react"; 
+import { Droplets, CloudRain, Sun, Wind } from "lucide-react"; 
 
 interface GraphCardProps {
   weather: any;
@@ -13,15 +13,16 @@ export default function GraphCard({
   loading,
   status,
 }: GraphCardProps) {
-  //  1. Updated state to include "uv"
-  const [graphType, setGraphType] = useState<"humidity" | "precip" | "uv">("humidity"); 
+  //  1. Updated state to include "wind"
+  const [graphType, setGraphType] = useState<"humidity" | "precip" | "uv" | "wind">("humidity"); 
 
-  //  2. Updated interval to cycle through three graphs every 10 seconds
+  //  2. Updated interval to cycle through four graphs every 10 seconds
   useEffect(() => { 
     const interval = setInterval(() => { 
       setGraphType((prev) => { 
         if (prev === "humidity") return "precip"; 
         if (prev === "precip") return "uv"; 
+        if (prev === "uv") return "wind"; 
         return "humidity"; 
       }); 
     }, 5000); 
@@ -43,7 +44,8 @@ export default function GraphCard({
         ...data,
         humidity: weather?.humidity ?? data.humidity,
         precip: weather?.precip ?? data.precip,
-        uvIndex: weather?.uvIndex ?? data.uvIndex  //  Syncing current UV index
+        uvIndex: weather?.uvIndex ?? data.uvIndex,
+        windSpeed: weather?.windSpeed ?? data.windSpeed  //  Syncing current wind speed
       };
     }
     return data;
@@ -60,21 +62,25 @@ export default function GraphCard({
     const spacing = hourlyData.length > 1 ? width / (hourlyData.length - 1) : 0;
 
     const points = hourlyData.map((data: any, i: number) => {
-      //  logic to switch metric values and max scales
+      //  Logic to switch metric values and max scales for all 4 types
       let val = data.humidity; 
       let maxVal = 100; 
 
       if (graphType === "precip") { 
-        val = data.precip; 
-        maxVal = Math.max(5, ...hourlyData.map((d: any) => d.precip)); 
+        val = (data.precip || 0); 
+        maxVal = Math.max(5, ...hourlyData.map((d: any) => d.precip || 0)); 
       } else if (graphType === "uv") { 
-        val = data.uvIndex; 
-        maxVal = 11; //  UV Index uses a standard scale of 0-11+ 
+        val = (data.uvIndex || 0); 
+        maxVal = 11; 
+      } else if (graphType === "wind") { 
+        val = (data.windSpeed || 0); 
+        //  Wind scale uses a dynamic ceiling with a floor of 40km/h (Danger threshold)
+        maxVal = Math.max(40, ...hourlyData.map((d: any) => d.windSpeed || 0)); 
       } 
 
       return {
         x: i * spacing,
-        y: paddingTop + (1 - Math.min(val / maxVal, 1)) * usableHeight,  //  Added clamp to prevent line-break 
+        y: paddingTop + (1 - Math.min(val / maxVal, 1)) * usableHeight,
       };
     });
 
@@ -106,15 +112,16 @@ export default function GraphCard({
       className={`w-full h-75 p-6 sm:p-8 rounded-[2rem] ${status.bgColor} bg-opacity-90 bg-gradient-to-b from-white/10 to-transparent text-white shadow-xl relative overflow-hidden transition-all duration-700`}
     >
       <div className="relative z-10 flex flex-col h-full">
-        {/*  Header with dynamic icons for all 3 types */}
         <div className="flex items-center gap-1.5 opacity-80 transition-all duration-500"> 
           {graphType === "humidity" && <Droplets size={12} strokeWidth={3} />} 
           {graphType === "precip" && <CloudRain size={12} strokeWidth={3} />} 
           {graphType === "uv" && <Sun size={12} strokeWidth={3} />} 
+          {graphType === "wind" && <Wind size={12} strokeWidth={3} />} 
           <p className="text-[10px] font-black uppercase tracking-[0.2em]"> 
             {graphType === "humidity" && "Humidity Forecast"} 
             {graphType === "precip" && "Precipitation Forecast"} 
             {graphType === "uv" && "UV Index Forecast"} 
+            {graphType === "wind" && "Wind Speed Forecast"} 
           </p> 
         </div> 
 
@@ -129,7 +136,6 @@ export default function GraphCard({
               </defs>
               <rect x="0" y="0" width="300" height="160" fill="none" stroke="white" strokeOpacity="0.2" strokeWidth="2" rx="8" />
               
-              {/* Grid Lines */}
               {[0, 25, 50, 75, 100].map((val, i) => (
                 <line key={`h-${i}`} x1="0" y1={160 - (val / 100) * 160} x2="300" y2={160 - (val / 100) * 160} stroke="white" strokeOpacity={val === 50 ? 0.3 : 0.1} strokeWidth="1" strokeDasharray="4 4" />
               ))}
@@ -147,10 +153,10 @@ export default function GraphCard({
             {hourlyData.map((data: any, i: number) => (
               <div key={i} className="flex flex-col items-center">
                 <p className="text-[10px] font-black italic transition-all duration-500"> 
-                  {/*  Dynamic Labels for values */}
-                  {graphType === "humidity" && `${data.humidity}%`} 
-                  {graphType === "precip" && `${data.precip}mm`} 
-                  {graphType === "uv" && `UV ${data.uvIndex}`} 
+                  {graphType === "humidity" && `${data.humidity ?? 0}%`} 
+                  {graphType === "precip" && `${data.precip ?? 0}mm`} 
+                  {graphType === "uv" && `UV ${data.uvIndex ?? 0}`} 
+                  {graphType === "wind" && `${data.windSpeed ?? 0}km/h`} 
                 </p> 
                 <p className="text-[8px] font-bold opacity-60 uppercase tracking-tighter">
                   {new Date(data.time * 1000).toLocaleTimeString([], { hour: "numeric", hour12: true })}
