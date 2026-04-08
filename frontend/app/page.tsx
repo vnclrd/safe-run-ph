@@ -7,11 +7,12 @@ import { analyzeWeather, fetchWeatherData } from "@/lib/logicEngine";
 
 // Components
 import TemperatureCard from "@/components/TemperatureCard";
-import RunCommendationCard, { getTimeOfDay } from "@/components/RunCommendationCard";
-import MetricCards from "@/components/MetricCards";
-import TemperatureForecastCard from "@/components/TemperatureForecastCard";
-import GraphCard from "@/components/GraphCard";
 import RunAbility from "@/components/RunAbility";
+import MetricCards from "@/components/MetricCards";
+import RunCommendationCard, { getTimeOfDay } from "@/components/RunCommendationCard";
+import GraphCard from "@/components/GraphCard";
+import TemperatureForecastCard from "@/components/TemperatureForecastCard";
+import FreeSpaceCard from "@/components/FreeSpaceCard";
 
 export default function Home() {
   // UI & Lifecycle States
@@ -57,7 +58,7 @@ export default function Home() {
     async function initializeWeather() {
       try {
         const coords = await getCoords();
-        const data = await fetchWeatherData(coords); // ⚡ Call Fetch from logicEngine
+        const data = await fetchWeatherData(coords); //  Call Fetch from logicEngine
         setWeather(data);
         setWeatherLoading(false);
         setTimeout(() => setShowHero(false), 1000);
@@ -155,19 +156,15 @@ export default function Home() {
         />
 
         <div className="lg:col-span-2">
-          <TemperatureForecastCard
-            weather={weather}
-            loading={weatherLoading}
-            status={status}
-          />
+          <TemperatureForecastCard weather={weather} loading={weatherLoading} status={status} />
         </div>
 
-        <div className="lg:col-span-2 lg:col-start-2">
-          <HeatMapCard
-            weather={weather}
-            loading={weatherLoading}
-            status={status}
-          />
+        <div className="hidden lg:block lg:row-span-2"> 
+          <FreeSpaceCard status={status} loading={weatherLoading} /> 
+        </div> 
+
+        <div className="lg:col-span-2">
+          <HeatMapCard weather={weather} loading={weatherLoading} status={status} />
         </div>
 
         <div className="lg:col-span-3 py-6 md:py-12 text-center">
