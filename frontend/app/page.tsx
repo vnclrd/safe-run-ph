@@ -9,6 +9,7 @@ import RunCommendationCard, {
 import MetricCards from "@/components/MetricCards";
 import TemperatureForecastCard from "@/components/TemperatureForecastCard";
 import GraphCard from "@/components/GraphCard";
+import RunAbility from "@/components/RunAbility";
 import dynamic from "next/dynamic";
 import recommendations from "@/lib/recommendations.json";
 import metricMsgs from "@/lib/metrics.json";
@@ -20,13 +21,13 @@ export default function Home() {
   const [isMounted, setIsMounted] = useState(false);
   const [showHero, setShowHero] = useState(true);
   const [isBranding, setIsBranding] = useState(false);
-  
+
   // Time-based States
   const [greeting, setGreeting] = useState("Good morning,");
   const [timeOfDay, setTimeOfDay] = useState<ReturnType<typeof getTimeOfDay>>("umaga");
 
   // Heat Map
-  const HeatMapCard = dynamic(() => import("@/components/HeatMapCard"), { 
+  const HeatMapCard = dynamic(() => import("@/components/HeatMapCard"), {
     ssr: false,
     loading: () => <div className="w-full h-[22rem] rounded-[2rem] bg-white animate-pulse" />
   });
@@ -48,7 +49,7 @@ export default function Home() {
     const clock = setInterval(updateTimeBasedState, 1000);
 
     const brandingTimer = setTimeout(() => setIsBranding(true), 1000);
-    
+
     // Fallback hero timer in case fetch takes too long
     const heroTimer = setTimeout(() => setShowHero(false), 2000);
 
@@ -80,7 +81,7 @@ export default function Home() {
         setShowHero(false);
       }
     }
-    
+
     fetchWeather();
 
     return () => {
@@ -101,7 +102,12 @@ export default function Home() {
     };
 
     if (!weather) {
-      return { status: defaultStatus, recommendation: null, metrics: null };
+      return {
+        status: defaultStatus,
+        recommendation: null,
+        metrics: null,
+        runScore: "0.00"
+      };
     }
 
     const getRand = (cat: string, lvl: string) => {
@@ -117,11 +123,17 @@ export default function Home() {
       return "#ff00ff";               // Extreme (Magenta)
     };
 
-    const effectiveTemp = weather.heatIndex || weather.temp || 0; 
+    const effectiveTemp = weather.heatIndex || weather.temp || 0;
     const precip = weather.precip || 0;
     const wind = weather.windSpeed || 0;
     const currentUv = weather.uvIndex || 0;
     const hum = weather.humidity || 0;
+
+    // 1. SHARED LOGIC FLAGS
+    const isExtremeTemp = effectiveTemp >= 42;
+    const isExtremePrecip = precip >= 7.6;
+    const isExtremeWind = wind >= 39;
+    const isExtremeUv = currentUv >= 8;
 
     // -- Voting Escalation Logic --
     const extremeCount =
@@ -143,52 +155,55 @@ export default function Home() {
       (isHumid ? 1 : 0) +
       (isWarm ? 1 : 0);
 
-    // -- Global Status & Category Determination --
+    // 2. CENTRALIZED SCORING (RunAbility Logic)
+    let score = 10.00;
+    if (isExtremeTemp) score -= 5.0; else if (isWarm) score -= 1.5;
+    if (isExtremePrecip) score -= 5.0; else if (isRainy) score -= 2.5;
+    if (isExtremeUv) score -= 4.0; else if (isSunny) score -= 1.5;
+    if (isExtremeWind) score -= 4.0; else if (isWindy) score -= 2.0;
+    if (isHumid && isWarm) score -= 1.5;
+
+    const runScore = Math.max(0, Math.min(10, score)).toFixed(2);
+
+    // 3. CATEGORY & STATUS DETERMINATION
     let category: "CHILLY" | "GOOD" | "CAUTION" | "DANGER" = "GOOD";
     let status = defaultStatus;
 
-    // DANGER: Extreme single metrics or 3+ cautions
     if (extremeCount >= 1 || cautionCount >= 3) {
       category = "DANGER";
-      status = { 
+      status = {
         bgGradient: "from-orange-500 to-rose-500",
         bgSubtle: "bg-rose-50",
         bgColor: "bg-rose-500/90",
         textColor: "text-rose-600",
-        label: "DANGER" 
+        label: "DANGER"
       };
-    } 
-    // CHILLY: Prioritize temp if it's cool, even if it's humid
-    else if (effectiveTemp < 26) {
+    } else if (effectiveTemp < 26) {
       category = "CHILLY";
-      status = { 
+      status = {
         bgGradient: "from-sky-400 to-blue-500",
-        bgSubtle: "bg-indigo-50", 
-        bgColor: "bg-blue-600/60", 
-        textColor: "text-blue-600", 
-        label: "CHILLY" 
+        bgSubtle: "bg-indigo-50",
+        bgColor: "bg-blue-600/60",
+        textColor: "text-blue-600",
+        label: "CHILLY"
       };
-    } 
-    // CAUTION: Only flag caution for moderate temps with environmental hurdles
-    else if (cautionCount >= 1) {
+    } else if (cautionCount >= 1) {
       category = "CAUTION";
-      status = { 
+      status = {
         bgGradient: "from-amber-400 to-orange-500",
         bgSubtle: "bg-orange-50",
-        bgColor: "bg-orange-600/60", 
-        textColor: "text-orange-600", 
-        label: "CAUTION" 
+        bgColor: "bg-orange-600/60",
+        textColor: "text-orange-600",
+        label: "CAUTION"
       };
-    } 
-    // GOOD: Default ideal running weather
-    else {
+    } else {
       category = "GOOD";
-      status = { 
+      status = {
         bgGradient: "from-emerald-400 to-cyan-500",
         bgSubtle: "bg-teal-50",
-        bgColor: "bg-emerald-600/60", 
-        textColor: "text-emerald-600", 
-        label: "GOOD" 
+        bgColor: "bg-emerald-600/60",
+        textColor: "text-emerald-600",
+        label: "GOOD"
       };
     }
 
@@ -204,18 +219,13 @@ export default function Home() {
     else if (isHumid) subCategory = "humid";
     else if (isWindy) subCategory = "windy";
 
-    const recPool =
-      (recommendations as any)[category]?.[subCategory] ||
-      (recommendations as any)[category]?.["optimal"] || [];
-    const randomAdvice = recPool.length > 0 ? recPool[Math.floor(Math.random() * recPool.length)] : "";
-
     // -- Metric Specific Formatting --
     // UV
     const uvLvl = currentUv >= 11 ? "extreme" : currentUv >= 8 ? "extreme" : currentUv >= 6 ? "high" : currentUv >= 3 ? "moderate" : "low";
     const uvLabel = currentUv >= 11 ? "Extreme" : currentUv >= 8 ? "Very High" : currentUv >= 6 ? "High" : currentUv >= 3 ? "Moderate" : "Low";
     const uvValue = weather?.uvIndex || 0;
     const uvHex = getUvHexColor(uvValue);
-    
+
     // Humidity
     const hLvl = hum < 30 ? "low" : hum <= 60 ? "optimal" : "high";
     const humColor = hum >= 85 ? "text-rose-500" : hLvl === "optimal" ? "text-emerald-500" : hLvl === "low" ? "text-blue-500" : "text-amber-500";
@@ -228,9 +238,14 @@ export default function Home() {
     const wLvl = wind < 12 ? "calm" : wind <= 28 ? "breezy" : "windy";
     const windColor = wind >= 39 ? "text-rose-500" : wind >= 29 ? "text-orange-500" : wind >= 12 ? "text-amber-500" : "text-emerald-500";
 
+    // FINAL ADVICE SELECTION
+    const recPool = (recommendations as any)[category]?.[subCategory] || (recommendations as any)[category]?.["optimal"] || [];
+    const randomAdvice = recPool.length > 0 ? recPool[Math.floor(Math.random() * recPool.length)] : null;
+
     return {
       status,
       recommendation: randomAdvice,
+      runScore,
       metrics: {
         uv: { desc: getRand("uvIndex", uvLvl), color: uvHex, percent: Math.min((currentUv / 11) * 100, 100), status: uvLabel },
         humidity: { desc: getRand("humidity", hLvl), color: humColor },
@@ -240,7 +255,7 @@ export default function Home() {
     };
   }, [weather]);
 
-  const { status, recommendation, metrics } = analysis;
+  const { status, recommendation, metrics, runScore } = analysis;
 
   return (
     <main className="min-h-screen bg-slate-50 overflow-x-hidden pt-8 pl-8 pr-8 sm:pt-4 sm:pl-16 sm:pr-16">
@@ -264,9 +279,8 @@ export default function Home() {
           <div className="relative h-[2.5rem] flex items-center justify-center">
             {/* Greeting */}
             <span
-              className={`absolute transition-opacity duration-300 ease-in-out text-center ${
-                isBranding ? "opacity-0" : "opacity-100"
-              }`}
+              className={`absolute transition-opacity duration-300 ease-in-out text-center ${isBranding ? "opacity-0" : "opacity-100"
+                }`}
             >
               <span className="whitespace-nowrap">{greeting}</span>
               <br />
@@ -275,9 +289,8 @@ export default function Home() {
 
             {/* Branding */}
             <span
-              className={`absolute transition-opacity duration-300 ease-in-out text-center whitespace-nowrap ${
-                isBranding ? "opacity-100" : "opacity-0"
-              }`}
+              className={`absolute transition-opacity duration-300 ease-in-out text-center whitespace-nowrap ${isBranding ? "opacity-100" : "opacity-0"
+                }`}
             >
               Safe-Run PH
             </span>
@@ -291,15 +304,13 @@ export default function Home() {
           loading={weatherLoading}
           status={status}
         />
-        
-        <div className="lg:col-span-2">
-          <RunCommendationCard
-            recommendation={recommendation}
-            loading={weatherLoading}
-            status={status}
-            timeOfDay={timeOfDay}
-          />
-        </div>
+
+        <RunAbility
+          loading={weatherLoading}
+          status={status}
+          runScore={runScore || "0.00"}
+          shortAdvice={recommendation?.title || "Evaluating..."}
+        />
 
         <MetricCards
           weather={weather}
@@ -311,10 +322,11 @@ export default function Home() {
         />
 
         <div className="lg:col-span-2">
-          <TemperatureForecastCard
-            weather={weather}
+          <RunCommendationCard
+            recommendation={recommendation}
             loading={weatherLoading}
             status={status}
+            timeOfDay={timeOfDay}
           />
         </div>
 
@@ -324,11 +336,19 @@ export default function Home() {
           status={status}
         />
 
+        <div className="lg:col-span-2">
+          <TemperatureForecastCard
+            weather={weather}
+            loading={weatherLoading}
+            status={status}
+          />
+        </div>
+
         <div className="lg:col-span-2 lg:col-start-2">
           <HeatMapCard
-            weather={weather} 
-            loading={weatherLoading} 
-            status={status} 
+            weather={weather}
+            loading={weatherLoading}
+            status={status}
           />
         </div>
 
