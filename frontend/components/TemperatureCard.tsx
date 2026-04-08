@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Thermometer, MapPin, Clock2 } from "lucide-react";
 import { getTimeOfDay } from "./RunCommendationCard";
 
-interface TemperatureBadgeProps {
+interface TemperatureCardProps {
   weather: {
     temp: number;
     heatIndex: number;
@@ -14,12 +14,12 @@ interface TemperatureBadgeProps {
   onTimeOfDayChange?: (timeOfDay: ReturnType<typeof getTimeOfDay>) => void;
 }
 
-export default function TemperatureBadge({
+export default function TemperatureCard({
   weather,
   loading,
   status,
   onTimeOfDayChange,
-}: TemperatureBadgeProps) {
+}: TemperatureCardProps) {
   const [time, setTime] = useState<string | null>(null);
 
   useEffect(() => {

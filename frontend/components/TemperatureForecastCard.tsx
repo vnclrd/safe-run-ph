@@ -79,17 +79,15 @@ export default function WeatherForecastCard({
   const getInnerAccentBg = () => {
     switch (status.label) {
       case "DANGER":
-        return "bg-black/40";
       case "CAUTION":
-        return "bg-black/40";
       case "GOOD":
-        return "bg-black/40";
       case "CHILLY":
-        return "bg-black/40";
       default:
         return "bg-black/40";
     }
   };
+
+  const hourlyData = weather.hourly;
 
   return (
     <div
@@ -123,7 +121,7 @@ export default function WeatherForecastCard({
           ref={scrollRef}
           className={`${getInnerAccentBg()} flex overflow-x-auto gap-1.5 p-2 scrollbar-hide rounded-[1.5rem] relative`}
         >
-          {weather.hourly.map((h: any, i: number) => {
+          {hourlyData.map((h: any, i: number) => {
             const date = new Date(h.time * 1000);
             const hour = date.getHours();
             const isNow = hour === currentHour;
@@ -151,13 +149,15 @@ export default function WeatherForecastCard({
                 </span>
 
                 <span
-                  className={`text-[8px] font-bold ${h.pop > 0 ? "text-sky-400" : "opacity-0"}`}
+                  className={`text-[8px] font-bold ${
+                    h.pop > 0 ? "text-sky-400" : "opacity-0"
+                  }`}
                 >
                   {h.pop}%
                 </span>
 
                 <span className="text-base font-black text-white">
-                  {h.temp}°
+                  {Math.round(h.feelsLike)}°
                 </span>
               </div>
             );
