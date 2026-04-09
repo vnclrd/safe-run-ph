@@ -101,7 +101,7 @@ export async function fetchAndCacheWeather(lat?: number, lon?: number) {
 
   if (
     snap.exists &&
-    Date.now() - snap.data()?.timestamp.toDate().getTime() < 15 * 60 * 1000
+    Date.now() - snap.data()?.timestamp.toDate().getTime() < 5 * 60 * 1000
   ) {
     weatherData = snap.data();
   } else {

@@ -70,7 +70,17 @@ export default function Home() {
 
     initializeWeather();
 
-    return () => { clearInterval(clock); clearTimeout(brandingTimer); clearTimeout(heroTimer); };
+    const refreshInterval = setInterval(() => {
+      console.log("Auto-refreshing weather data...");
+      initializeWeather();
+    }, 5 * 60 * 1000);
+
+    return () => {
+      clearInterval(clock);
+      clearTimeout(brandingTimer);
+      clearTimeout(heroTimer);
+      clearInterval(refreshInterval);
+    };
   }, []);
 
   // 2. Structural Analysis (Powered by Logic Engine)
@@ -159,9 +169,9 @@ export default function Home() {
           <TemperatureForecastCard weather={weather} loading={weatherLoading} status={status} />
         </div>
 
-        <div className="hidden lg:block lg:row-span-2"> 
-          <FreeSpaceCard status={status} loading={weatherLoading} /> 
-        </div> 
+        <div className="hidden lg:block lg:row-span-2">
+          <FreeSpaceCard status={status} loading={weatherLoading} />
+        </div>
 
         <div className="lg:col-span-2">
           <HeatMapCard weather={weather} loading={weatherLoading} status={status} />
