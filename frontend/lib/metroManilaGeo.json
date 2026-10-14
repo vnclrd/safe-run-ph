@@ -1,0 +1,45 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "name": "Manila / Pasay", "lat": 14.58, "lon": 120.98 },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[120.95, 14.54], [121.00, 14.54], [121.01, 14.61], [120.96, 14.61], [120.95, 14.54]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Makati / BGC / Taguig", "lat": 14.55, "lon": 121.04 },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[121.01, 14.51], [121.07, 14.51], [121.06, 14.57], [121.01, 14.57], [121.01, 14.51]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Quezon City / North", "lat": 14.67, "lon": 121.04 },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[121.00, 14.61], [121.08, 14.61], [121.07, 14.73], [120.99, 14.71], [121.00, 14.61]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Muntinlupa / Las Piñas / South", "lat": 14.44, "lon": 121.01 },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[120.96, 14.41], [121.06, 14.41], [121.05, 14.49], [120.98, 14.49], [120.96, 14.41]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Pasig / Marikina / East", "lat": 14.61, "lon": 121.09 },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[121.06, 14.55], [121.12, 14.55], [121.13, 14.66], [121.06, 14.64], [121.06, 14.55]]]
+      }
+    }
+  ]
+}

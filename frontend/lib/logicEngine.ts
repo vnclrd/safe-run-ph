@@ -1,6 +1,13 @@
 import recommendations from "@/lib/recommendations.json";
 import metricMsgs from "@/lib/metrics.json";
 
+export function getHeatIndexColor(heatIndex: number): string {
+  if (heatIndex < 26) return "#3b82f6"; // Chilly (Blue)
+  if (heatIndex <= 31) return "#10b981"; // Good (Green)
+  if (heatIndex <= 38) return "#f59e0b"; // Caution (Orange)
+  return "#ef4444"; // Danger (Red)
+}
+
 // Helper: Get Random Message from Metrics JSON
 export const getRandMetricMsg = (cat: string, lvl: string) => {
   const pool = (metricMsgs as any)[cat]?.[lvl];

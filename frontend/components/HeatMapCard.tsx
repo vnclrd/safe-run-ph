@@ -1,16 +1,49 @@
-"use client";
-import { useEffect, useRef, useState } from "react";
-import { Map as MapIcon, Crosshair } from "lucide-react";
-import { MapContainer, TileLayer, useMap } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
+'use client';
+import { useEffect, useRef, useState, useMemo } from 'react';
+import { Map as MapIcon, Crosshair } from 'lucide-react';
+import { MapContainer, TileLayer, useMap } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
 
 // ─── Metro Manila boundary polygon (lat/lon, clockwise) ─────────────────────
 const METRO_MANILA_POLYGON: [number, number][] = [
-  [14.765, 120.96], [14.765, 121.01], [14.72, 121.02], [14.71, 121.08],
-  [14.68, 121.11], [14.62, 121.13], [14.57, 121.12], [14.54, 121.1],
-  [14.49, 121.08], [14.46, 121.06], [14.4, 121.045], [14.38, 121.02],
-  [14.38, 120.98], [14.42, 120.96], [14.47, 120.97], [14.5, 120.96],
-  [14.59, 120.95], [14.66, 120.93], [14.72, 120.94], [14.765, 120.96],
+  [14.765, 120.96],
+  [14.765, 121.01],
+  [14.72, 121.02],
+  [14.71, 121.08],
+  [14.68, 121.11],
+  [14.62, 121.13],
+  [14.57, 121.12],
+  [14.54, 121.1],
+  [14.49, 121.08],
+  [14.46, 121.06],
+  [14.4, 121.045],
+  [14.38, 121.02],
+  [14.38, 120.98],
+  [14.42, 120.96],
+  [14.47, 120.97],
+  [14.5, 120.96],
+  [14.59, 120.95],
+  [14.66, 120.93],
+  [14.72, 120.94],
+  [14.765, 120.96],
+];
+
+// Key Metro Manila reference stations to interpolate across when backend grid is absent
+const METRO_MANILA_STATIONS = [
+  { name: 'City of Manila', lat: 14.5995, lon: 120.9842, offset: 0.5 },
+  { name: 'Quezon City', lat: 14.676, lon: 121.0437, offset: 0.2 },
+  { name: 'Makati / BGC', lat: 14.5547, lon: 121.0244, offset: 0.8 },
+  { name: 'Pasig', lat: 14.5764, lon: 121.0851, offset: 0.4 },
+  { name: 'Caloocan North', lat: 14.7566, lon: 121.045, offset: -0.5 },
+  { name: 'Caloocan South', lat: 14.6416, lon: 120.9762, offset: 0.3 },
+  { name: 'Marikina', lat: 14.6507, lon: 121.1029, offset: -0.6 },
+  { name: 'Taguig', lat: 14.5176, lon: 121.0509, offset: 0.5 },
+  { name: 'Parañaque', lat: 14.4793, lon: 121.0198, offset: 0.1 },
+  { name: 'Las Piñas', lat: 14.4445, lon: 120.9939, offset: -0.2 },
+  { name: 'Muntinlupa', lat: 14.4081, lon: 121.0415, offset: -0.4 },
+  { name: 'Navotas / Malabon', lat: 14.6658, lon: 120.9497, offset: 0.0 },
+  { name: 'San Juan / Mandaluyong', lat: 14.5925, lon: 121.033, offset: 0.6 },
+  { name: 'Pasay', lat: 14.5378, lon: 120.9995, offset: 0.4 },
 ];
 
 function isInsideMetroManila(lat: number, lon: number): boolean {
@@ -34,7 +67,8 @@ function distanceToMMBoundary(lat: number, lon: number): number {
     const [ay, ax] = poly[i];
     const [by, bx] = poly[j];
 
-    const dx = bx - ax, dy = by - ay;
+    const dx = bx - ax,
+      dy = by - ay;
     const lenSq = dx * dx + dy * dy;
     let t = lenSq === 0 ? 0 : ((lon - ax) * dx + (lat - ay) * dy) / lenSq;
     t = Math.max(0, Math.min(1, t));
@@ -61,10 +95,10 @@ function CityZoomButton({ lat, lon }: { lat: number; lon: number }) {
   return (
     <button
       onClick={handleZoom}
-      className="absolute bottom-4 left-4 z-[400] bg-white text-white p-3 rounded-full shadow-lg hover:bg-slate-200 hover:scale-105 transition-all flex items-center justify-center"
-      title="Find Me"
+      className='absolute bottom-4 left-4 z-[400] bg-white text-white p-3 rounded-full shadow-lg hover:bg-slate-200 hover:scale-105 transition-all flex items-center justify-center'
+      title='Find Me'
     >
-      <Crosshair size={18} className="text-slate-400" />
+      <Crosshair size={18} className='text-slate-400' />
     </button>
   );
 }
@@ -76,63 +110,74 @@ function CanvasHeatmapLayer({ gridData }: { gridData: any[] }) {
   const layerRef = useRef<any>(null);
 
   useEffect(() => {
-    if (typeof window === "undefined" || !gridData || gridData.length === 0) return;
+    if (typeof window === 'undefined' || !gridData || gridData.length === 0)
+      return;
 
-    const L = require("leaflet");
+    const L = require('leaflet');
 
     const CanvasLayer = L.Layer.extend({
-      onAdd(map: any) {
-        const canvas = L.DomUtil.create("canvas", "leaflet-canvas-heatmap") as HTMLCanvasElement;
-        canvas.style.position = "absolute";
-        canvas.style.top = "0";
-        canvas.style.left = "0";
-        canvas.style.pointerEvents = "none";
-        canvas.style.opacity = "0.80";
+      onAdd(mapInstance: any) {
+        const canvas = L.DomUtil.create(
+          'canvas',
+          'leaflet-canvas-heatmap'
+        ) as HTMLCanvasElement;
+        canvas.style.position = 'absolute';
+        canvas.style.top = '0';
+        canvas.style.left = '0';
+        canvas.style.pointerEvents = 'none';
+        canvas.style.opacity = '0.80';
 
-        map.getPanes().tilePane.appendChild(canvas);
+        mapInstance.getPanes().tilePane.appendChild(canvas);
         canvasRef.current = canvas;
 
-        this._map = map;
+        this._map = mapInstance;
         this._draw();
 
-        map.on("zoom move resize", this._draw, this);
+        mapInstance.on('zoom move resize', this._draw, this);
       },
 
-      onRemove(map: any) {
+      onRemove(mapInstance: any) {
         if (canvasRef.current) canvasRef.current.remove();
-        map.off("zoom move resize", this._draw, this);
+        mapInstance.off('zoom move resize', this._draw, this);
       },
 
       _draw() {
-        const map = this._map;
-        if (!map || !canvasRef.current) return;
+        const currentMap = this._map;
+        if (!currentMap || !canvasRef.current) return;
 
         const canvas = canvasRef.current;
-        const size = map.getSize();
+        const size = currentMap.getSize();
         canvas.width = size.x;
         canvas.height = size.y;
 
-        const topLeft = map.containerPointToLayerPoint([0, 0]);
+        const topLeft = currentMap.containerPointToLayerPoint([0, 0]);
         L.DomUtil.setPosition(canvas, topLeft);
 
-        const ctx = canvas.getContext("2d")!;
+        const ctx = canvas.getContext('2d')!;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        const STEP = 4; 
+        const STEP = 4;
         const COLOR_STOPS = [
-          { temp: 22, r: 59, g: 130, b: 246 }, 
-          { temp: 26, r: 16, g: 185, b: 129 }, 
-          { temp: 32, r: 245, g: 158, b: 11 }, 
-          { temp: 39, r: 239, g: 68, b: 68 },  
-          { temp: 44, r: 180, g: 20, b: 20 },  
+          { temp: 22, r: 59, g: 130, b: 246 },  // Blue (< 26°C)
+          { temp: 26, r: 16, g: 185, b: 129 }, // Green (26–31°C)
+          { temp: 32, r: 245, g: 158, b: 11 },  // Orange (32–38°C)
+          { temp: 39, r: 239, g: 68, b: 68 },   // Red (≥ 39°C)
+          { temp: 44, r: 180, g: 20, b: 20 },
         ];
 
         function tempToRgb(temp: number): [number, number, number] {
-          if (temp <= COLOR_STOPS[0].temp) return [COLOR_STOPS[0].r, COLOR_STOPS[0].g, COLOR_STOPS[0].b];
-          if (temp >= COLOR_STOPS[COLOR_STOPS.length - 1].temp) return [COLOR_STOPS[COLOR_STOPS.length - 1].r, COLOR_STOPS[COLOR_STOPS.length - 1].g, COLOR_STOPS[COLOR_STOPS.length - 1].b];
-          
+          if (temp <= COLOR_STOPS[0].temp)
+            return [COLOR_STOPS[0].r, COLOR_STOPS[0].g, COLOR_STOPS[0].b];
+          if (temp >= COLOR_STOPS[COLOR_STOPS.length - 1].temp)
+            return [
+              COLOR_STOPS[COLOR_STOPS.length - 1].r,
+              COLOR_STOPS[COLOR_STOPS.length - 1].g,
+              COLOR_STOPS[COLOR_STOPS.length - 1].b,
+            ];
+
           for (let i = 0; i < COLOR_STOPS.length - 1; i++) {
-            const lo = COLOR_STOPS[i], hi = COLOR_STOPS[i + 1];
+            const lo = COLOR_STOPS[i],
+              hi = COLOR_STOPS[i + 1];
             if (temp >= lo.temp && temp <= hi.temp) {
               const f = (temp - lo.temp) / (hi.temp - lo.temp);
               return [
@@ -146,7 +191,7 @@ function CanvasHeatmapLayer({ gridData }: { gridData: any[] }) {
         }
 
         const projectedCities = gridData.map((city: any) => {
-          const pt = map.latLngToContainerPoint([city.lat, city.lon]);
+          const pt = currentMap.latLngToContainerPoint([city.lat, city.lon]);
           return { x: pt.x, y: pt.y, temp: city.temp };
         });
 
@@ -155,10 +200,12 @@ function CanvasHeatmapLayer({ gridData }: { gridData: any[] }) {
 
         for (let py = 0; py < canvas.height; py += STEP) {
           for (let px = 0; px < canvas.width; px += STEP) {
-            let numerator = 0, denominator = 0;
+            let numerator = 0,
+              denominator = 0;
 
             for (const city of projectedCities) {
-              const dx = px - city.x, dy = py - city.y;
+              const dx = px - city.x,
+                dy = py - city.y;
               const distSq = dx * dx + dy * dy;
               const safeDist = Math.max(distSq, 1);
               const w = 1 / Math.pow(safeDist, 1.5);
@@ -169,22 +216,26 @@ function CanvasHeatmapLayer({ gridData }: { gridData: any[] }) {
             const interpolatedTemp = numerator / denominator;
             const [r, g, b] = tempToRgb(interpolatedTemp);
 
-            const latlng = map.containerPointToLatLng([px, py]);
+            const latlng = currentMap.containerPointToLatLng([px, py]);
             const dist = distanceToMMBoundary(latlng.lat, latlng.lng);
 
             if (dist < -0.012) continue;
 
             const FEATHER_DEG = 0.018;
-            const edgeAlpha = dist >= FEATHER_DEG ? 1.0 : dist <= 0 ? 0.0 : dist / FEATHER_DEG;
+            const edgeAlpha =
+              dist >= FEATHER_DEG ? 1.0 : dist <= 0 ? 0.0 : dist / FEATHER_DEG;
             const smoothAlpha = edgeAlpha * edgeAlpha * (3 - 2 * edgeAlpha);
-            const finalAlpha = Math.round(smoothAlpha * 60);
-            
+            const finalAlpha = Math.round(smoothAlpha * 70);
+
             if (finalAlpha === 0) continue;
 
             for (let oy = 0; oy < STEP && py + oy < canvas.height; oy++) {
               for (let ox = 0; ox < STEP && px + ox < canvas.width; ox++) {
                 const idx = ((py + oy) * canvas.width + (px + ox)) * 4;
-                data[idx] = r; data[idx + 1] = g; data[idx + 2] = b; data[idx + 3] = finalAlpha;
+                data[idx] = r;
+                data[idx + 1] = g;
+                data[idx + 2] = b;
+                data[idx + 3] = finalAlpha;
               }
             }
           }
@@ -193,7 +244,7 @@ function CanvasHeatmapLayer({ gridData }: { gridData: any[] }) {
         ctx.putImageData(imgData, 0, 0);
         ctx.filter = `blur(${STEP * 3}px)`;
         ctx.drawImage(canvas, 0, 0);
-        ctx.filter = "none";
+        ctx.filter = 'none';
       },
     });
 
@@ -212,20 +263,22 @@ function CanvasHeatmapLayer({ gridData }: { gridData: any[] }) {
 // ─── Legend ──────────────────────────────────────────────────────────────────
 function Legend() {
   return (
-    <div className="absolute top-4 right-4 z-[400] bg-white/80 backdrop-blur-md rounded-xl px-3 py-2 flex flex-col gap-1 max-w-[140px] sm:max-w-none scale-90 sm:scale-100 origin-bottom-right">
-      <p className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">
+    <div className='absolute top-4 right-4 z-[400] bg-white/85 backdrop-blur-md rounded-xl px-3 py-2 flex flex-col gap-1 max-w-[140px] sm:max-w-none scale-90 sm:scale-100 origin-bottom-right shadow-sm'>
+      <p className='text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1'>
         Heat Index
       </p>
       {[
-        { color: "bg-blue-500", label: "< 26°C", sub: "Chilly" },
-        { color: "bg-emerald-500", label: "26–31°C", sub: "Good" },
-        { color: "bg-amber-500", label: "32–38°C", sub: "Caution" },
-        { color: "bg-red-500", label: "≥ 39°C", sub: "Danger" },
+        { color: 'bg-blue-500', label: '< 26°C', sub: 'Chilly' },
+        { color: 'bg-emerald-500', label: '26–31°C', sub: 'Good' },
+        { color: 'bg-amber-500', label: '32–38°C', sub: 'Caution' },
+        { color: 'bg-red-500', label: '≥ 39°C', sub: 'Danger' },
       ].map(({ color, label, sub }) => (
-        <div key={sub} className="flex items-center gap-2">
+        <div key={sub} className='flex items-center gap-2'>
           <div className={`w-2.5 h-2.5 rounded-full ${color} flex-shrink-0`} />
-          <span className="text-[8px] sm:text-[9px] font-bold text-slate-400">{label}</span>
-          <span className="text-[8px] sm:text-[9px] text-slate-500">{sub}</span>
+          <span className='text-[8px] sm:text-[9px] font-bold text-slate-400'>
+            {label}
+          </span>
+          <span className='text-[8px] sm:text-[9px] text-slate-500'>{sub}</span>
         </div>
       ))}
     </div>
@@ -234,52 +287,63 @@ function Legend() {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function HeatMap({ weather, loading, status }: HeatMapProps) {
-  // Add state to track if it's currently daytime
   const [isDaytime, setIsDaytime] = useState(true);
 
-  // Check the time on mount and update every minute
   useEffect(() => {
     const checkTime = () => {
       const hour = new Date().getHours();
-      // 6:00 AM (6) to 5:59 PM (17) is Daytime
       setIsDaytime(hour >= 6 && hour < 18);
     };
 
-    checkTime(); // Run immediately
-    const timer = setInterval(checkTime, 60000); // Check every 60 seconds
+    checkTime();
+    const timer = setInterval(checkTime, 60000);
     return () => clearInterval(timer);
   }, []);
 
+  const lat = weather?.lat || 14.5995;
+  const lon = weather?.lon || 120.9842;
+  const baseTemp = weather?.heatIndex ?? weather?.temp ?? 31;
+
+  // Build gridData dynamically from live weather if heatmapGrid is absent
+  const gridData = useMemo(() => {
+    if (weather?.heatmapGrid && weather.heatmapGrid.length > 0) {
+      return weather.heatmapGrid;
+    }
+    return METRO_MANILA_STATIONS.map((station) => ({
+      name: station.name,
+      lat: station.lat,
+      lon: station.lon,
+      temp: Math.round((baseTemp + station.offset) * 10) / 10,
+    }));
+  }, [weather?.heatmapGrid, baseTemp]);
+
   if (loading) {
     return (
-      <div className={`w-full h-[22rem] rounded-[2rem] animate-pulse border shadow-sm flex items-center justify-center ${isDaytime ? "bg-slate-100 border-slate-200" : "bg-slate-900 border-slate-800"}`}>
-        <MapIcon className="animate-bounce text-slate-400" size={32} />
+      <div
+        className={`w-full h-[22rem] rounded-[2rem] animate-pulse border shadow-sm flex items-center justify-center ${
+          isDaytime ? 'bg-slate-100 border-slate-200' : 'bg-slate-900 border-slate-800'
+        }`}
+      >
+        <MapIcon className='animate-bounce text-slate-400' size={32} />
       </div>
     );
   }
 
-  const lat = weather?.lat || 14.5995;
-  const lon = weather?.lon || 120.9842;
-  const gridData = weather?.heatmapGrid || [];
-
-  // Determine styles and map URL based on the time of day
-  const mapUrl = isDaytime 
-    ? "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" 
-    : "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
-    
-  const mapBgColor = isDaytime ? "#f1f5f9" : "#1e293b";
-  const containerBgClass = isDaytime ? "bg-slate-100" : "bg-slate-800";
+  const mapBgColor = isDaytime ? '#f8fafc' : '#0f172a';
+  const containerBgClass = isDaytime ? 'bg-slate-100' : 'bg-slate-800';
 
   return (
-    <div className="w-full h-75 p-6 sm:p-8 rounded-[2rem] bg-white shadow-sm transition-all duration-700">
-      <div className="flex items-center gap-1.5 mb-4">
-        <p className="flex gap-1.5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center sm:text-left">
+    <div className='w-full h-75 p-6 sm:p-8 rounded-[2rem] bg-white shadow-sm transition-all duration-700'>
+      <div className='flex items-center gap-1.5 mb-4'>
+        <p className='flex gap-1.5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center sm:text-left'>
           <MapIcon size={12} strokeWidth={3} />
           Heat Index Map
         </p>
       </div>
 
-      <div className={`w-full h-55 sm:h-50 rounded-[1rem] overflow-hidden relative z-0 transition-colors duration-1000 ${containerBgClass}`}>
+      <div
+        className={`w-full h-55 sm:h-50 rounded-[1rem] overflow-hidden relative z-0 transition-colors duration-1000 ${containerBgClass}`}
+      >
         <MapContainer
           center={[14.55, 121.02]}
           zoom={10}
@@ -291,10 +355,12 @@ export default function HeatMap({ weather, loading, status }: HeatMapProps) {
           ]}
           maxBoundsViscosity={1.0}
           scrollWheelZoom={true}
-          style={{ height: "100%", width: "100%", backgroundColor: mapBgColor }}
+          style={{ height: '100%', width: '100%', backgroundColor: mapBgColor }}
         >
+          {/* Free, keyless OpenStreetMap tile layer (no watermark) */}
           <TileLayer
-            url={mapUrl}
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
           />
 
           <CanvasHeatmapLayer gridData={gridData} />
