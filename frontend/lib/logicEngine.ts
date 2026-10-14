@@ -8,13 +8,11 @@ export function getHeatIndexColor(heatIndex: number): string {
   return "#ef4444"; // Danger (Red)
 }
 
-// Helper: Get Random Message from Metrics JSON
 export const getRandMetricMsg = (cat: string, lvl: string) => {
   const pool = (metricMsgs as any)[cat]?.[lvl];
   return pool ? pool[Math.floor(Math.random() * pool.length)] : "";
 };
 
-// Helper: UV Color Logic
 export const getUvHexColor = (uv: number) => {
   if (uv <= 2) return "#34d399";
   if (uv <= 5) return "#fbbf24";
@@ -23,7 +21,6 @@ export const getUvHexColor = (uv: number) => {
   return "#ff00ff";
 };
 
-// ⚡ Alternative 1: Fetch from your local Next.js Route Handler
 export async function fetchWeatherData(coords: { lat: number; lon: number } | null) {
   const res = await fetch("/api/weather", {
     method: "POST",
@@ -41,7 +38,6 @@ export async function fetchWeatherData(coords: { lat: number; lon: number } | nu
   return await res.json();
 }
 
-// The Analysis Engine (with our night-aware and encouragement logic)
 export function analyzeWeather(weather: any) {
   const defaultStatus = {
     bgGradient: "bg-slate-200",
@@ -61,80 +57,114 @@ export function analyzeWeather(weather: any) {
   const currentUv = weather.uvIndex || 0;
   const hum = weather.humidity || 0;
 
-  const isNight = currentUv < 1.0;
+  // Real daytime check: 6:00 AM to 5:59 PM (18:00)
+  const currentHour = new Date().getHours();
+  const isNight = currentHour < 6 || currentHour >= 18;
 
-  // Logic Flags
-  const isExtremeTemp = effectiveTemp >= 42;
-  const isExtremePrecip = precip >= 7.6;
-  const isExtremeWind = wind >= 39;
-  const isExtremeUv = currentUv >= 11;
+  // PAGASA & Runner Stress Thresholds
+  const isExtremeTemp = effectiveTemp >= 42; // Danger (Cramps/Heatstroke likely)
+  const isExtremePrecip = precip >= 7.6;     // Heavy rain / flooded roads
+  const isExtremeWind = wind >= 39;          // Gale force
+  const isExtremeUv = currentUv >= 11;       // Extreme radiation
 
-  const extremeCount =
-    (isExtremeTemp ? 1 : 0) +
-    (isExtremePrecip ? 1 : 0) +
-    (isExtremeWind ? 1 : 0) +
-    (isExtremeUv ? 1 : 0);
-
-  const isRainy = precip > 0;
-  const isWindy = wind >= 29;
+  const isRainy = precip > 0.2;
+  const isWindy = wind >= 28;
   const isSunny = currentUv >= 6;
-  const isWarm = isNight ? effectiveTemp >= 36 : effectiveTemp >= 32;
-  const isHumid = isNight ? hum > 85 : hum > 65;
-  const isVeryHot = effectiveTemp >= 38;
 
-  const cautionCount =
-    (isRainy ? 1 : 0) +
-    (isWindy ? 1 : 0) +
-    (isSunny ? 1 : 0) +
-    (isHumid ? 1 : 0) +
-    (isWarm ? 1 : 0);
+  // At night, Pinoy runners can tolerate 32-34°C if there's no radiant sun.
+  // But during the day, 33°C+ heat index is immediately warm/caution.
+  const isWarm = isNight ? effectiveTemp >= 35 : effectiveTemp >= 33;
+  const isHumid = hum > 70;
 
-  // Scoring Logic
+  // Scoring Logic (Accurate Deductions out of 10.0)
   let score = 10.0;
-  if (isExtremeTemp) score -= 5.0; else if (effectiveTemp >= 32) score -= 1.0;
-  if (isExtremePrecip) score -= 5.0; else if (isRainy) score -= 2.0;
-  if (isExtremeUv) score -= 4.0; else if (isSunny) score -= 1.0;
-  if (isExtremeWind) score -= 4.0; else if (isWindy) score -= 2.0;
-  if (hum > 65 && effectiveTemp >= 30) score -= 1.0;
+
+  // Heat Index Deductions
+  if (effectiveTemp >= 42) {
+    score -= 5.5;
+  } else if (effectiveTemp >= 37) {
+    score -= 3.0; // 37-41: High Caution
+  } else if (effectiveTemp >= 33) {
+    score -= 2.0; // 33-36: Moderate Caution (e.g., 36°C drops score to 8.0 or below)
+  } else if (effectiveTemp < 24) {
+    score -= 0.5;
+  }
+
+  // Weather Deductions
+  if (precip >= 7.6) score -= 4.0;
+  else if (precip > 1.5) score -= 2.0;
+  else if (precip > 0) score -= 1.0;
+
+  if (currentUv >= 11) score -= 3.0;
+  else if (currentUv >= 8) score -= 2.0;
+  else if (currentUv >= 6) score -= 1.0;
+
+  if (wind >= 39) score -= 3.5;
+  else if (wind >= 28) score -= 1.5;
+
+  if (hum > 75 && effectiveTemp >= 30) score -= 1.0;
 
   const runScore = Math.max(0, Math.min(10, score)).toFixed(2);
 
-  // Category & Status Determination
+  // Status Category Determination
   let category: "CHILLY" | "GOOD" | "CAUTION" | "DANGER" = "GOOD";
   let status = defaultStatus;
 
-  if (extremeCount >= 1 || cautionCount >= 3) {
+  if (isExtremeTemp || isExtremePrecip || isExtremeWind || isExtremeUv || effectiveTemp >= 42) {
     category = "DANGER";
-    status = { bgGradient: "from-orange-500 to-rose-500", bgSubtle: "bg-rose-50", bgColor: "bg-rose-500/90", textColor: "text-rose-600", label: "DANGER" };
-  } else if (effectiveTemp < 26) {
+    status = {
+      bgGradient: "from-orange-500 to-rose-500",
+      bgSubtle: "bg-rose-50",
+      bgColor: "bg-rose-500/90",
+      textColor: "text-rose-600",
+      label: "DANGER",
+    };
+  } else if (effectiveTemp < 25) {
     category = "CHILLY";
-    status = { bgGradient: "from-sky-400 to-blue-500", bgSubtle: "bg-indigo-50", bgColor: "bg-blue-600/60", textColor: "text-blue-600", label: "CHILLY" };
-  } else if (cautionCount >= 2 || isVeryHot) {
+    status = {
+      bgGradient: "from-sky-400 to-blue-500",
+      bgSubtle: "bg-indigo-50",
+      bgColor: "bg-blue-600/60",
+      textColor: "text-blue-600",
+      label: "CHILLY",
+    };
+  } else if (effectiveTemp >= 34 || isSunny || (isRainy && wind >= 20) || (hum > 80 && effectiveTemp >= 31)) {
     category = "CAUTION";
-    status = { bgGradient: "from-amber-400 to-orange-500", bgSubtle: "bg-orange-50", bgColor: "bg-orange-600/60", textColor: "text-orange-600", label: "CAUTION" };
+    status = {
+      bgGradient: "from-amber-400 to-orange-500",
+      bgSubtle: "bg-orange-50",
+      bgColor: "bg-orange-600/60",
+      textColor: "text-orange-600",
+      label: "CAUTION",
+    };
   } else {
     category = "GOOD";
-    status = { bgGradient: "from-emerald-400 to-cyan-500", bgSubtle: "bg-teal-50", bgColor: "bg-emerald-600/60", textColor: "text-emerald-600", label: "GOOD" };
+    status = {
+      bgGradient: "from-emerald-400 to-cyan-500",
+      bgSubtle: "bg-teal-50",
+      bgColor: "bg-emerald-600/60",
+      textColor: "text-emerald-600",
+      label: "GOOD",
+    };
   }
 
-  // Sub-Category Routing
+  // Routing Subcategory
   let subCategory = "optimal";
-  const actualHumid = hum > 60;
-  const actualWarm = effectiveTemp >= 32;
-
   if (category === "DANGER") subCategory = "extreme";
   else if (isRainy && isWindy) subCategory = "rainy_windy";
-  else if (isSunny && actualHumid) subCategory = "sunny_humid";
-  else if (isSunny && isWindy) subCategory = "sunny_windy";
-  else if (actualHumid && isWindy) subCategory = "humid_windy";
-  else if (isRainy) subCategory = "rainy";
+  else if (isSunny && hum > 65) subCategory = "sunny_humid";
   else if (isSunny) subCategory = "sunny";
-  else if (category === "CAUTION" && isVeryHot) subCategory = "warm";
-  else if (category === "GOOD" && actualWarm) subCategory = "warm";
-  else if (actualHumid) subCategory = "humid";
+  else if (isRainy) subCategory = "rainy";
+  else if (effectiveTemp >= 33) subCategory = isNight ? "warm_night" : "warm_day";
+  else if (hum > 70) subCategory = isNight ? "humid_night" : "humid";
   else if (isWindy) subCategory = "windy";
 
-  const recPool = (recommendations as any)[category]?.[subCategory] || (recommendations as any)[category]?.["optimal"] || [];
+  const recPool =
+    (recommendations as any)[category]?.[subCategory] ||
+    (recommendations as any)[category]?.[isNight ? "warm_night" : "warm_day"] ||
+    (recommendations as any)[category]?.["optimal"] ||
+    [];
+
   const randomAdvice = recPool.length > 0 ? recPool[Math.floor(Math.random() * recPool.length)] : null;
 
   const uvLvl = currentUv >= 11 ? "extreme" : currentUv >= 8 ? "extreme" : currentUv >= 6 ? "high" : currentUv >= 3 ? "moderate" : "low";
