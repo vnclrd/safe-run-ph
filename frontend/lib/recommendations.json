@@ -1,0 +1,90 @@
+{
+  "GOOD": {
+    "optimal": [
+      {
+        "title": "Ideal Running Conditions",
+        "message": "Swak ang panahon para humataw. Sulitin ang magandang kondisyon para basagin ang target pace mo ngayong araw."
+      },
+      {
+        "title": "Solid Weather, Let's Go",
+        "message": "Maganda ang klima sa labas. Ihanda ang sapatos at mag-enjoy sa bawat kilometro ngayong araw."
+      }
+    ],
+    "warm": [
+      {
+        "title": "Warm Night, Presko Run",
+        "message": "Medyo mainit ang singaw pero panalo ang simoy ng gabi. I-push ang pace at enjoy-in ang preskong kalsada ngayong araw."
+      },
+      {
+        "title": "Evening Warmth, Hit It",
+        "message": "Mainit man ang semento, wala namang haring araw na papaso sa'yo. Sulitin ang gabi para humataw ngayong araw."
+      },
+      {
+        "title": "Tropical Night, Go Hard",
+        "message": "Sanay ang Pinoy sa ganitong init. Wag mag-petiks dahil safe at presko ang hangin ngayong araw."
+      }
+    ],
+    "humid": [
+      {
+        "title": "Humid Night, Still Fresh",
+        "message": "Presko pa rin ang simoy ng gabi kahit malagkit ang hangin. Samantalahin ang dilim para humataw ngayong araw."
+      },
+      {
+        "title": "Muggy but Safe",
+        "message": "Medyo malagkit pero mas madali huminga pag wala ang init ng araw. Wag pigilan ang bilis ngayong araw."
+      }
+    ],
+    "windy": [
+      {
+        "title": "Fresh & Breezy",
+        "message": "Presko ang hanging sumasalubong. Gamitin ang momentum para tuloy-tuloy ang arangkada ngayong araw."
+      }
+    ]
+  },
+  "CAUTION": {
+    "warm": [
+      {
+        "title": "Extreme Night Heat, Slow Down",
+        "message": "Matindi ang singaw ng kalsada kahit gabi na. Bagalan ang takbo at wag pilitin ang katawan ngayong araw."
+      },
+      {
+        "title": "Deceptive Warmth, Hydrate",
+        "message": "Wag magpaloko sa dilim; mataas pa rin ang heat index. Uminom ng maraming tubig habang tumatakbo ngayong araw."
+      }
+    ],
+    "humid": [
+      {
+        "title": "Sticky Conditions, Pace Yourself",
+        "message": "Mabigat ang hangin dahil sa mataas na humidity. Magdahan-dahan at makinig sa pintig ng puso ngayong araw."
+      }
+    ],
+    "sunny": [
+      {
+        "title": "High Heat Exposure",
+        "message": "Matindi ang tama ng araw. Mag-hydrate bago umalis at humanap ng malilim na daanan ngayong araw."
+      }
+    ],
+    "rainy": [
+      {
+        "title": "Slippery Roads",
+        "message": "Basa ang kalsada dulot ng ulan. Mag-ingat sa bawat yapak upang maiwasan ang madulas ngayong araw."
+      }
+    ]
+  },
+  "CHILLY": {
+    "optimal": [
+      {
+        "title": "Cool Weather",
+        "message": "Malamig-lamig ang simoy ng hangin. Huwag kalimutang mag-warm up nang maayos bago kumaripas ngayong araw."
+      }
+    ]
+  },
+  "DANGER": {
+    "extreme": [
+      {
+        "title": "Hazardous Weather, Stay Safe",
+        "message": "Mapanganib ang kondisyon sa labas dahil sa matinding panahon. Mas mainam na magpahinga o mag-treadmill muna ngayon."
+      }
+    ]
+  }
+}

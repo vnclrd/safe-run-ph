@@ -1,0 +1,75 @@
+{
+  "uvIndex": {
+    "low": [
+      "Ligtas ang sikat ng araw.",
+      "Minimal UV exposure.",
+      "Mababa ang UV, komportableng tumakbo."
+    ],
+    "moderate": [
+      "Katamtamang sikat ng araw.",
+      "Magsuot ng cap o shades kung sensitibo.",
+      "Ayos lang ang init pero mag-ingat."
+    ],
+    "high": [
+      "Mataas ang UV index, maglagay ng sunscreen.",
+      "Iwasan ang direktang tama ng araw kung matagal.",
+      "Matindi ang sikat, protektahan ang balat."
+    ],
+    "extreme": [
+      "Mapanganib ang UV level. Mag-ingat nang husto.",
+      "Sun protection is strictly required.",
+      "Napakainit ng araw, humanap ng malilim na ruta."
+    ]
+  },
+  "humidity": {
+    "low": [
+      "Mababa ang moisture, tuyo ang hangin.",
+      "Madaling huminga pero magbaon ng tubig.",
+      "Dry air, hydrate regularly."
+    ],
+    "optimal": [
+      "Tamang-tama ang halumigmig sa hangin.",
+      "Komportableng huminga habang tumatakbo.",
+      "Optimal breathing conditions."
+    ],
+    "high": [
+      "Mataas ang halumigmig, asahan ang mabilis na pagpawis.",
+      "Malagkit ang hangin, bagalan ang pace kung kailangan.",
+      "Muggy air, prioritize hydration."
+    ]
+  },
+  "precipitation": {
+    "dry": [
+      "Tuyo ang kalsada.",
+      "Walang banta ng ulan.",
+      "Dry road conditions."
+    ],
+    "light": [
+      "May kaunting ambon o ambon-ambon.",
+      "Medyo madulas ang daan, mag-ingat sa hakbang.",
+      "Light drizzle, watch your traction."
+    ],
+    "heavy": [
+      "Malakas ang buhos ng ulan.",
+      "Madulas at may posibleng baha, mag-ingat.",
+      "Heavy rain, safety first."
+    ]
+  },
+  "windSpeed": {
+    "calm": [
+      "Banayad ang simoy ng hangin.",
+      "Walang sagabal sa pacing.",
+      "Calm wind conditions."
+    ],
+    "breezy": [
+      "May preskong hangin.",
+      "Masarap sa pakiramdam habang tumatakbo.",
+      "Pleasant running breeze."
+    ],
+    "windy": [
+      "Malakas ang salubong ng hangin.",
+      "Dagdag resistensya sa takbo.",
+      "Strong wind resistance."
+    ]
+  }
+}

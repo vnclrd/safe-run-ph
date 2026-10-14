@@ -26,7 +26,7 @@ pubsub-debug.log*
 
 # Firebase Functions build output
 # If your backend uses TypeScript, this is where the compiled JS lives
-lib/
+backend/functions/lib/
 dist/
 
 # --- Environment & Secrets ---
